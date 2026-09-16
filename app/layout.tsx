@@ -1,30 +1,35 @@
-import { Geist, Geist_Mono, Oxanium } from "next/font/google"
-
+import type { Metadata } from "next"
+import localFont from "next/font/local"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
 
-const oxanium = Oxanium({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
+const sans = localFont({
+  src: [
+    { path: "./fonts/thmanyahsans-Regular.woff2", weight: "400" },
+    { path: "./fonts/thmanyahsans-Medium.woff2", weight: "500" },
+  ],
+  variable: "--font-thmanyah-sans",
+  display: "swap",
 })
-
+const serif = localFont({
+  src: "./fonts/thmanyahserifdisplay-Regular.woff2",
+  weight: "400",
+  variable: "--font-thmanyah-serif",
+  display: "swap",
+})
+export const metadata: Metadata = {
+  title: "Mudheef — A land of stories",
+  description:
+    "Explore Iraq’s timeless places, living culture, and generous spirit. Discover a different side of Iraq with Mudheef.",
+}
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", oxanium.variable)}
+      className={`${sans.variable} ${serif.variable} antialiased`}
     >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
