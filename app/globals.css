@@ -731,3 +731,485 @@ a:focus-visible {
 [dir="rtl"] .lang-toggle {
   flex-direction: row-reverse;
 }
+
+/* ---------------------------------------------------------------------------
+   Added sections — ways to travel, journeys, events, journal, newsletter.
+
+   Everything below is additive: new class names only, so no rule above
+   changes. Where a shadcn primitive already supplies the surface (Card,
+   Badge, Button, Input) the class here only overrides what needs the print
+   vocabulary — square corners, no shadow, dotted rules.
+   --------------------------------------------------------------------------- */
+
+/* Mirrors the destination section's shell metrics so the page keeps a single
+   vertical rhythm. Duplicated rather than shared because `.destinations` is
+   existing markup that must not move. */
+.section-shell {
+  padding: 42px 6% 70px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* --- Ways to travel --- */
+
+.rail-hint {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.experience-rail {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.experience-chip {
+  height: 46px;
+  padding-inline: 20px;
+  border-style: dashed;
+  border-radius: 999px;
+  font-size: 14px;
+  gap: 9px;
+}
+.experience-chip svg {
+  color: var(--orange);
+}
+.section-dialog {
+  max-height: 90svh;
+  overflow: auto;
+  border-radius: 12px;
+}
+.section-dialog .section-index {
+  margin: 0 0 10px;
+}
+.section-dialog [data-slot="dialog-title"] {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.6px;
+  padding-inline-end: 20px;
+}
+.section-dialog [data-slot="dialog-description"] {
+  margin-top: 12px;
+  line-height: 1.7;
+}
+.dialog-places {
+  border-top: 1px dotted var(--border);
+  padding-top: 18px;
+}
+.dialog-places .section-index {
+  margin: 0 0 14px;
+}
+.dialog-places ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.dialog-places li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.dialog-places li svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  color: var(--muted-foreground);
+}
+.dialog-excerpt {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #514e47;
+  border-inline-start: 2px solid var(--orange);
+  padding-inline-start: 18px;
+}
+
+/* --- Journeys --- */
+
+.journey-route-content {
+  padding: 0 23px 22px;
+}
+/* Both new card grids pin their footer to the bottom of the ticket. Route
+   length and title wrapping differ per card, so without explicit rows the
+   duration stamps and read-time badges land at different heights and the
+   grid reads as broken. */
+.journey-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.journey-route-content .section-index {
+  margin: 0 0 14px;
+}
+/* The thread is drawn once, behind the list, so it can never paint over the
+   stop dots the way a per-item ::after would. */
+.journey-route {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.journey-route::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 5px;
+  top: 17px;
+  bottom: 17px;
+  border-inline-start: 1px dotted #c9bfae;
+}
+.journey-route li {
+  position: relative;
+  padding-inline-start: 24px;
+  padding-block: 7px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #605b52;
+}
+.journey-route li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 2px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border: 1.5px solid var(--orange);
+  border-radius: 50%;
+  background: var(--card);
+}
+.duration-badge {
+  height: 26px;
+  padding-inline: 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  gap: 7px;
+}
+.duration-badge svg {
+  color: var(--orange);
+}
+
+/* --- Events --- */
+
+.event-list {
+  list-style: none;
+  margin: 44px 0 0;
+  padding: 0;
+  border-top: 1px dotted var(--border);
+}
+.event-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 26px;
+  padding: 22px 24px;
+  border-radius: 0;
+  border-bottom: 1px dotted var(--border);
+  background: transparent;
+  box-shadow: none;
+}
+.event-window {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.8px;
+}
+.event-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.event-detail h3 {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+.event-detail p {
+  margin-top: 7px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #605b52;
+}
+.event-category {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.event-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.event-place svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+/* --- Journal --- */
+
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 34px;
+  margin-top: 46px;
+}
+.journal-card {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.journal-card [data-slot="card-header"] {
+  align-content: start;
+  gap: 12px;
+  min-height: 0;
+  padding: 0 0 26px;
+  border-bottom: 1px dotted var(--border);
+  border-radius: 0;
+}
+.journal-kicker {
+  margin: 0;
+}
+.journal-card [data-slot="card-title"] {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: clamp(21px, 1.95vw, 28px);
+  font-weight: 700;
+  line-height: 1.16;
+  letter-spacing: -0.7px;
+}
+.journal-card [data-slot="card-description"] {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.journal-card [data-slot="card-footer"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0 0;
+  border-radius: 0;
+}
+.journal-time {
+  height: auto;
+  padding: 0;
+  border: 0;
+  gap: 7px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.journal-time svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* --- Newsletter --- */
+
+.newsletter {
+  padding-bottom: 78px;
+}
+.newsletter-coupon {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 46px 44px;
+  text-align: center;
+  border: 1px dashed #c9bfae;
+  background: color-mix(in srgb, var(--card) 65%, transparent);
+}
+.newsletter-coupon .section-index {
+  margin-bottom: 14px;
+}
+.newsletter-coupon h2 {
+  font-size: clamp(28px, 2.9vw, 42px);
+}
+.newsletter-body {
+  max-width: 380px;
+  margin: 16px auto 30px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #605b52;
+}
+.newsletter-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.newsletter-form [data-slot="input"] {
+  height: 48px;
+  padding-inline: 20px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+}
+.newsletter-form [data-slot="button"] {
+  flex: none;
+  height: 48px;
+  min-width: 136px;
+  border-radius: 999px;
+}
+.newsletter-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  text-align: start;
+}
+.newsletter-consent [data-slot="checkbox"] {
+  margin-top: 2px;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+.newsletter-consent [data-slot="label"] {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.newsletter-success {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--orange);
+}
+
+@media (max-width: 1000px) {
+  .journey-route-content {
+    padding: 0 18px 18px;
+  }
+  .journal-grid {
+    gap: 24px;
+  }
+  .event-row {
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .event-place {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .section-shell {
+    padding: 24px 25px 44px;
+  }
+  .rail-hint {
+    margin-top: 20px;
+    font-size: 11px;
+  }
+  .experience-rail {
+    margin-top: 16px;
+    gap: 9px;
+  }
+  .experience-chip {
+    height: 42px;
+    padding-inline: 16px;
+    font-size: 13px;
+  }
+  .section-dialog [data-slot="dialog-title"] {
+    font-size: 25px;
+  }
+  .journey-route-content {
+    padding: 0 22px 18px;
+  }
+  .event-list {
+    margin-top: 30px;
+  }
+  .event-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 20px 0;
+  }
+  .event-place {
+    grid-column: 1;
+  }
+  .event-window {
+    font-size: 21px;
+  }
+  .event-detail h3 {
+    font-size: 19px;
+  }
+  .journal-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    margin-top: 34px;
+  }
+  .newsletter {
+    padding-bottom: 52px;
+  }
+  .newsletter-coupon {
+    padding: 34px 22px;
+  }
+  .newsletter-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .newsletter-form [data-slot="button"] {
+    width: 100%;
+  }
+}
+
+/* Arabic month names are far wider than the Latin abbreviations the event
+   grid was measured for, so the window column needs more room in RTL. Scoped
+   above the mobile breakpoint so the single-column fallback still wins. */
+@media (min-width: 641px) {
+  [dir="rtl"] .event-row {
+    grid-template-columns: 200px minmax(0, 1fr) auto;
+  }
+}
+@media (min-width: 641px) and (max-width: 1000px) {
+  [dir="rtl"] .event-row {
+    grid-template-columns: 150px minmax(0, 1fr);
+  }
+}
+
+/* RTL — same reasoning as the block above: Arabic is a joined script, so every
+   tracked rule added in these sections resets to normal in Arabic. */
+[dir="rtl"] .rail-hint,
+[dir="rtl"] .duration-badge,
+[dir="rtl"] .event-category,
+[dir="rtl"] .event-place,
+[dir="rtl"] .journal-time {
+  letter-spacing: normal;
+}
+[dir="rtl"] .section-dialog [data-slot="dialog-title"],
+[dir="rtl"] .event-window,
+[dir="rtl"] .event-detail h3,
+[dir="rtl"] .journal-card [data-slot="card-title"] {
+  letter-spacing: normal;
+  line-height: 1.35;
+}
+[dir="rtl"] .dialog-excerpt {
+  line-height: 1.95;
+}
+[dir="rtl"] .event-detail p,
+[dir="rtl"] .journal-card [data-slot="card-description"],
+[dir="rtl"] .newsletter-body {
+  line-height: 1.85;
+}
+[dir="rtl"] .newsletter-consent [data-slot="label"] {
+  line-height: 1.9;
+}
