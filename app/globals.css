@@ -760,24 +760,92 @@ a:focus-visible {
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
+.experience-threads {
+  position: relative;
+  isolation: isolate;
+  max-width: 900px;
+  margin: 28px auto 0;
+}
 .experience-rail {
+  position: relative;
+  z-index: 1;
   list-style: none;
-  margin: 20px 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
+  margin: 0;
+  padding: 16px 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px minmax(0, 1fr);
+  grid-template-rows: repeat(3, 70px);
+  gap: 38px 24px;
+}
+.experience-rail > li {
+  grid-column: 1;
+  justify-self: start;
+  align-self: center;
+}
+.experience-rail > li:nth-child(n + 4) {
+  grid-column: 3;
+  justify-self: end;
+}
+.experience-rail > li:nth-child(3n + 1) {
+  grid-row: 1;
+}
+.experience-rail > li:nth-child(3n + 2) {
+  grid-row: 2;
+}
+.experience-rail > li:nth-child(3n) {
+  grid-row: 3;
+}
+.experience-hub {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 100px;
+  height: 100px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+/* The tatweel in the wordmark draws its width, so the mark is sized against
+   the 100px medallion rather than the 33px header lockup. */
+.experience-hub .brand-name {
+  font-size: 18px;
+}
+.experience-threads > svg {
+  z-index: 0;
 }
 .experience-chip {
-  height: 46px;
-  padding-inline: 20px;
+  background: var(--background);
+  height: 54px;
+  padding-inline: 10px 20px;
   border-style: dashed;
   border-radius: 999px;
   font-size: 14px;
-  gap: 9px;
+  gap: 11px;
+}
+.experience-chip-art,
+.experience-chip-icon {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 999px;
+}
+.experience-chip-art {
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+.experience-chip-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
 }
 .experience-chip svg {
+  width: 17px;
+  height: 17px;
   color: var(--orange);
 }
 .section-dialog {
@@ -1121,13 +1189,35 @@ a:focus-visible {
     font-size: 11px;
   }
   .experience-rail {
-    margin-top: 16px;
-    gap: 9px;
+    grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+    grid-template-rows: repeat(3, 90px);
+    gap: 22px 8px;
+  }
+  .experience-rail > li {
+    width: 100%;
+    max-width: 140px;
+  }
+  .experience-hub {
+    width: 64px;
+    height: 64px;
+  }
+  .experience-hub .brand-name {
+    font-size: 12px;
   }
   .experience-chip {
-    height: 42px;
-    padding-inline: 16px;
+    height: auto;
+    min-height: 76px;
+    width: 100%;
+    flex-direction: column;
+    white-space: normal;
+    padding: 8px;
+    gap: 5px;
     font-size: 13px;
+  }
+  .experience-chip-art,
+  .experience-chip-icon {
+    width: 30px;
+    height: 30px;
   }
   .section-dialog [data-slot="dialog-title"] {
     font-size: 25px;

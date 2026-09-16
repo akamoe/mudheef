@@ -1,6 +1,7 @@
 "use client"
 
-import { Fragment, useState } from "react"
+import { createRef, Fragment, useRef, useState } from "react"
+import Image from "next/image"
 import {
   ArrowDown,
   ArrowUpRight,
@@ -21,6 +22,7 @@ import {
 
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
+import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -58,6 +60,17 @@ const experienceIcons: Record<ExperienceIcon, typeof Landmark> = {
   water: Ship,
   craft: Palette,
   walk: Footprints,
+}
+
+/** Vintage plates for the chips. Add a key here and the chip switches to a
+ *  photo; anything without one keeps its icon. */
+const experienceImages: Partial<Record<ExperienceIcon, string>> = {
+  faith: "/images/experiences/faith.webp",
+  food: "/images/experiences/food.webp",
+  music: "/images/experiences/music.webp",
+  water: "/images/experiences/water.webp",
+  craft: "/images/experiences/craft.webp",
+  walk: "/images/experiences/walk.webp",
 }
 
 /** The header mark is the Arabic wordmark on its own — the English lockup is
@@ -158,7 +171,7 @@ function Newsletter() {
 }
 
 export default function Page() {
-  const { messages } = useLanguage()
+  const { messages, dir } = useLanguage()
   const {
     header,
     hero,
@@ -171,6 +184,12 @@ export default function Page() {
     footer,
     a11y,
   } = messages
+
+  const threadsRef = useRef<HTMLDivElement>(null)
+  const hubRef = useRef<HTMLDivElement>(null)
+  const [chipRefs] = useState(() =>
+    experiences.items.map(() => createRef<HTMLLIElement>())
+  )
 
   return (
     <>
@@ -353,46 +372,89 @@ export default function Page() {
             </p>
           </div>
           <p className="rail-hint">{experiences.hint}</p>
-          <ul className="experience-rail" aria-label={a11y.experiencesList}>
-            {experiences.items.map((item) => {
-              const Icon = experienceIcons[item.icon]
+          <div className="experience-threads" ref={threadsRef}>
+            {experiences.items.map((item, index) => (
+              <AnimatedBeam
+                key={`${dir}-${item.id}`}
+                containerRef={threadsRef}
+                fromRef={chipRefs[index]}
+                toRef={hubRef}
+                curvature={[-70, 0, 70][index % 3]}
+                endYOffset={[-10, 0, 10][index % 3]}
+                reverse={index < 3 === (dir === "rtl")}
+                duration={4}
+                delay={(index % 3) * 0.5}
+                pathColor="var(--border)"
+                pathOpacity={0.8}
+                pathWidth={2}
+                gradientStartColor="var(--orange)"
+                gradientStopColor="var(--orange)"
+              />
+            ))}
+            <div className="experience-hub" ref={hubRef}>
+              <Brand mark />
+            </div>
+            <ul className="experience-rail" aria-label={a11y.experiencesList}>
+              {experiences.items.map((item, index) => {
+                const Icon = experienceIcons[item.icon]
+                const photo = experienceImages[item.icon]
 
-              return (
-                <li key={item.id}>
-                  <Dialog>
-                    <DialogTrigger
-                      render={
-                        <Button variant="outline" className="experience-chip" />
-                      }
-                    >
-                      <Icon data-icon="inline-start" aria-hidden="true" />
-                      {item.label}
-                    </DialogTrigger>
-                    <DialogContent className="section-dialog">
-                      <DialogHeader>
-                        <p className="section-index">{item.label}</p>
-                        <DialogTitle>{item.title}</DialogTitle>
-                        <DialogDescription>{item.detail}</DialogDescription>
-                      </DialogHeader>
-                      <div className="dialog-places">
-                        <p className="section-index">
-                          {experiences.placesLabel}
-                        </p>
-                        <ul>
-                          {item.places.map((place) => (
-                            <li key={place}>
-                              <MapPin aria-hidden="true" />
-                              {place}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </li>
-              )
-            })}
-          </ul>
+                return (
+                  <li key={item.id} ref={chipRefs[index]}>
+                    <Dialog>
+                      <DialogTrigger
+                        render={
+                          <Button
+                            variant="outline"
+                            className="experience-chip"
+                          />
+                        }
+                      >
+                        {photo ? (
+                          <Image
+                            className="experience-chip-art"
+                            src={photo}
+                            alt=""
+                            width={64}
+                            height={64}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <span
+                            className="experience-chip-icon"
+                            aria-hidden="true"
+                          >
+                            <Icon />
+                          </span>
+                        )}
+                        {item.label}
+                      </DialogTrigger>
+                      <DialogContent className="section-dialog">
+                        <DialogHeader>
+                          <p className="section-index">{item.label}</p>
+                          <DialogTitle>{item.title}</DialogTitle>
+                          <DialogDescription>{item.detail}</DialogDescription>
+                        </DialogHeader>
+                        <div className="dialog-places">
+                          <p className="section-index">
+                            {experiences.placesLabel}
+                          </p>
+                          <ul>
+                            {item.places.map((place) => (
+                              <li key={place}>
+                                <MapPin aria-hidden="true" />
+                                {place}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
         </section>
         <section
           id="journeys"
