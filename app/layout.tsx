@@ -1,35 +1,67 @@
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 import localFont from "next/font/local"
+
+import { LanguageProvider } from "@/components/language-provider"
+import {
+  defaultLocale,
+  directionFor,
+  getDictionary,
+  isLocale,
+  localeCookieName,
+  type Locale,
+} from "@/lib/i18n"
 import "./globals.css"
 
 const sans = localFont({
   src: [
+    { path: "./fonts/thmanyahsans-Light.woff2", weight: "300" },
     { path: "./fonts/thmanyahsans-Regular.woff2", weight: "400" },
     { path: "./fonts/thmanyahsans-Medium.woff2", weight: "500" },
+    { path: "./fonts/thmanyahsans-Bold.woff2", weight: "700" },
   ],
   variable: "--font-thmanyah-sans",
   display: "swap",
 })
+
+// Headings use Thmanyah Serif Display, the "خط ثمانية للعناوين" cut, at the
+// weights the type settings call for (regular + semibold/bold).
 const serif = localFont({
-  src: "./fonts/thmanyahserifdisplay-Regular.woff2",
-  weight: "400",
+  src: [
+    { path: "./fonts/thmanyahserifdisplay-Regular.woff2", weight: "400" },
+    { path: "./fonts/thmanyahserifdisplay-Bold.woff2", weight: "700" },
+  ],
   variable: "--font-thmanyah-serif",
   display: "swap",
 })
-export const metadata: Metadata = {
-  title: "Mudheef — A land of stories",
-  description:
-    "Explore Iraq’s timeless places, living culture, and generous spirit. Discover a different side of Iraq with Mudheef.",
+
+async function readLocale(): Promise<Locale> {
+  const cookieStore = await cookies()
+  const value = cookieStore.get(localeCookieName)?.value
+
+  return isLocale(value) ? value : defaultLocale
 }
-export default function RootLayout({
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { meta } = getDictionary(await readLocale())
+
+  return { title: meta.title, description: meta.description }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await readLocale()
+
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={directionFor(locale)}
       className={`${sans.variable} ${serif.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
+      </body>
     </html>
   )
 }
