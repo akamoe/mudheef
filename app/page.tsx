@@ -22,6 +22,7 @@ import {
 
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
+import { JourneyMap } from "@/components/journey-map"
 import { ThemeToggle } from "@/components/theme-toggle"
 import ScrollExpand from "@/components/ScrollExpand"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
@@ -48,6 +49,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import type { DestinationIcon, ExperienceIcon } from "@/lib/i18n"
+import { places } from "@/lib/places"
 
 const destinationIcons: Record<DestinationIcon, typeof Landmark> = {
   landmark: Landmark,
@@ -179,6 +181,7 @@ export default function Page() {
     hero,
     destinations,
     experiences,
+    placeInfo,
     journeys,
     events,
     journal,
@@ -477,53 +480,60 @@ export default function Page() {
             </p>
           </div>
           <div className="destination-grid">
-            {journeys.cards.map((journey) => (
-              <Card
-                key={journey.number}
-                /* `destination-card` is the ticket treatment — perforated edge,
-                   clipped art frame, hover lift. It is reused verbatim rather
-                   than copied so the journey grid cannot drift away from the
-                   destination grid. */
-                className="destination-card journey-card"
-              >
-                <CardHeader>
-                  <div className="stamp-top">
-                    <Route aria-hidden="true" />
-                    <span>{journey.number}</span>
-                  </div>
-                  <CardTitle>
-                    <h3>
-                      {journey.name}
-                      <br />
-                      {journey.subtitle}
-                    </h3>
-                  </CardTitle>
-                  <CardDescription>{journey.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="journey-route-content">
-                  <p
-                    className="section-index"
-                    id={`journey-route-${journey.number}`}
-                  >
-                    {journeys.routeLabel}
-                  </p>
-                  <ol
-                    className="journey-route"
-                    aria-labelledby={`journey-route-${journey.number}`}
-                  >
-                    {journey.stops.map((stop) => (
-                      <li key={stop}>{stop}</li>
-                    ))}
-                  </ol>
-                </CardContent>
-                <CardFooter>
-                  <Badge variant="outline" className="duration-badge">
-                    <Clock data-icon="inline-start" aria-hidden="true" />
-                    {journey.duration}
-                  </Badge>
-                </CardFooter>
-              </Card>
-            ))}
+            {journeys.cards.map((journey) => {
+              // Resolve ids to coordinates and copy once per card so the map
+              // component stays dumb and `lib/places.ts` stays the only source
+              // of truth for where anything is.
+              const stops = journey.stops.map((stop) => ({
+                name: stop.name,
+                coordinates: places[stop.id],
+                ...placeInfo[stop.id],
+              }))
+
+              return (
+                <Card
+                  key={journey.number}
+                  /* `destination-card` is the ticket treatment — perforated edge,
+                     clipped art frame, hover lift. It is reused verbatim rather
+                     than copied so the journey grid cannot drift away from the
+                     destination grid. */
+                  className="destination-card journey-card"
+                >
+                  <CardHeader>
+                    <div className="stamp-top">
+                      <Route aria-hidden="true" />
+                      <span>{journey.number}</span>
+                    </div>
+                    <CardTitle>
+                      <h3>
+                        {journey.name}
+                        <br />
+                        {journey.subtitle}
+                      </h3>
+                    </CardTitle>
+                    <CardDescription>{journey.description}</CardDescription>
+                  </CardHeader>
+                  {/* The map takes the row the destination art takes in the
+                      other grid: same ticket, the picture swapped for the
+                      route. The printed stop list went with it — the pins say
+                      the same thing, and clicking one says more. */}
+                  <CardContent className="journey-map-content">
+                    <JourneyMap
+                      stops={stops}
+                      label={`${journeys.mapLabel} — ${journey.name}`}
+                      stopLabel={journeys.stopLabel}
+                      seeLabel={journeys.seeLabel}
+                    />
+                  </CardContent>
+                  <CardFooter>
+                    <Badge variant="outline" className="duration-badge">
+                      <Clock data-icon="inline-start" aria-hidden="true" />
+                      {journey.duration}
+                    </Badge>
+                  </CardFooter>
+                </Card>
+              )
+            })}
           </div>
         </section>
         <section
@@ -595,6 +605,9 @@ export default function Page() {
                       <h3>{item.title}</h3>
                     </CardTitle>
                     <CardDescription>{item.dek}</CardDescription>
+                    <p className="journal-byline">
+                      {item.author} · {item.place}
+                    </p>
                   </CardHeader>
                   <CardFooter>
                     <Badge variant="outline" className="journal-time">
@@ -620,7 +633,18 @@ export default function Page() {
                     <DialogTitle>{item.title}</DialogTitle>
                     <DialogDescription>{item.dek}</DialogDescription>
                   </DialogHeader>
+                  <p className="dialog-byline">
+                    {item.author} · {item.place} · {item.when}
+                  </p>
+                  {/* Lede, pull line, then the piece. The dialog is the article;
+                      the card is only its first line. */}
                   <p className="dialog-excerpt">{item.excerpt}</p>
+                  <p className="dialog-pull">{item.pull}</p>
+                  <div className="dialog-body">
+                    {item.body.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
                 </DialogContent>
               </Dialog>
             ))}

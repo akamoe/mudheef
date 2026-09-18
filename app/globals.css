@@ -103,6 +103,24 @@
   ::selection {
     background: var(--selection);
   }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-transparent! dark:invert;
+  }
 }
 .page-guides {
   position: absolute;
@@ -1045,58 +1063,125 @@ a:focus-visible {
   border-inline-start: 2px solid var(--orange);
   padding-inline-start: 18px;
 }
+/* Byline on the card: last thing in the header, sitting on the dotted rule the
+   way a magazine sets one under a standfirst. */
+.journal-byline {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  color: var(--muted-foreground);
+}
+/* Byline in the dialog: opens the article instead of closing the card. */
+.dialog-byline {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px dotted var(--border);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  color: var(--muted-foreground);
+}
+.dialog-pull {
+  margin: 26px 0 0;
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.4px;
+  color: var(--foreground);
+  text-wrap: balance;
+}
+.dialog-body p {
+  margin: 18px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
 
 /* --- Journeys --- */
 
-.journey-route-content {
-  padding: 0 23px 22px;
-}
 /* Both new card grids pin their footer to the bottom of the ticket. Route
    length and title wrapping differ per card, so without explicit rows the
    duration stamps and read-time badges land at different heights and the
    grid reads as broken. */
 .journey-card {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(190px, 1fr) auto;
 }
-.journey-route-content .section-index {
-  margin: 0 0 14px;
-}
-/* The thread is drawn once, behind the list, so it can never paint over the
-   stop dots the way a per-item ::after would. */
-.journey-route {
-  position: relative;
-  list-style: none;
-  margin: 0;
+/* Grid, not block: it lets the map stretch to whatever the row turns out to be,
+   so it stays flush with the footer instead of leaving a gap above it. */
+.journey-map-content {
   padding: 0;
+  display: grid;
 }
-.journey-route::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 5px;
-  top: 17px;
-  bottom: 17px;
-  border-inline-start: 1px dotted var(--rule);
-}
-.journey-route li {
+/* The map is drawn left-to-right even when the page is not. MapLibre mirrors
+   nothing on its own, so an RTL container only drags the controls and the
+   popup offsets out of place. */
+.journey-map {
   position: relative;
-  padding-inline-start: 24px;
-  padding-block: 7px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink-quiet);
+  direction: ltr;
+  height: 100%;
+  min-height: 190px;
+  overflow: hidden;
 }
-.journey-route li::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 2px;
-  top: 50%;
-  width: 7px;
-  height: 7px;
-  margin-top: -3.5px;
-  border: 1.5px solid var(--orange);
-  border-radius: 50%;
-  background: var(--card);
+.journey-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--card);
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 4px 10px #3f342033;
+}
+.journey-popup {
+  /* Wider than mapcn's `max-w-62`: a stop is a name, a kind and two lines of
+     copy, and 248px broke the note across five lines. */
+  width: 300px;
+  max-width: 300px;
+}
+/* The map container is forced to ltr so MapLibre's controls don't mirror, but
+   popup copy is prose and has to follow the page. */
+[dir="rtl"] .journey-popup {
+  direction: rtl;
+}
+.journey-popup-index,
+.journey-popup-kind {
+  margin: 0;
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.journey-popup-name {
+  margin: 6px 0 0;
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.journey-popup-kind {
+  margin-top: 5px;
+  color: var(--orange);
+}
+.journey-popup-see-label {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.journey-popup-see {
+  margin: 5px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-quiet);
 }
 .duration-badge {
   height: 26px;
@@ -1309,9 +1394,6 @@ a:focus-visible {
 }
 
 @media (max-width: 1000px) {
-  .journey-route-content {
-    padding: 0 18px 18px;
-  }
   .journal-grid {
     gap: 24px;
   }
@@ -1365,9 +1447,6 @@ a:focus-visible {
   }
   .section-dialog [data-slot="dialog-title"] {
     font-size: 25px;
-  }
-  .journey-route-content {
-    padding: 0 22px 18px;
   }
   .event-list {
     margin-top: 30px;
