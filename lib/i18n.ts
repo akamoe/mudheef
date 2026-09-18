@@ -86,6 +86,7 @@ export type Dictionary = {
     experiencesList: string
     newsletterForm: string
   }
+  theme: { label: string }
   header: { destinations: string; story: string; cta: string }
   hero: {
     titleLine1: string
@@ -112,6 +113,11 @@ export type Dictionary = {
     bodyLine1: string
     bodyLine2: string
     cta: string
+    /** Copy for the mudhif plate in this section: the alt text for the
+     *  engraving and the scroll cue. The held title and the text that replaces
+     *  it reuse the hero's lines. */
+    expandAlt: string
+    expandHint: string
   }
   experiences: {
     index: string
@@ -174,6 +180,7 @@ const en: Dictionary = {
   },
   brand: { name: "mudheef", alt: arabicWordmark, altLang: "ar", logo: arabicWordmark },
   language: { label: "Language", english: "English", arabic: "Arabic" },
+  theme: { label: "Switch between light and dark" },
   a11y: {
     skip: "Skip to content",
     home: "Mudheef home",
@@ -264,6 +271,9 @@ const en: Dictionary = {
     bodyLine2:
       "We believe the best way to discover Iraq is to feel at home in it.",
     cta: "Find your place in the story",
+    expandAlt:
+      "Engraving of a mudhif, the reed guest house of the southern marshes",
+    expandHint: "Scroll",
   },
   experiences: {
     index: "WAYS TO TRAVEL",
@@ -489,6 +499,7 @@ const ar: Dictionary = {
   },
   brand: { name: arabicWordmark, alt: "mudheef", altLang: "en", logo: arabicWordmark },
   language: { label: "اللغة", english: "الإنجليزية", arabic: "العربية" },
+  theme: { label: "التبديل بين الفاتح والداكن" },
   a11y: {
     skip: "تخطَّ إلى المحتوى",
     home: "الصفحة الرئيسية لمُضيف",
@@ -576,6 +587,8 @@ const ar: Dictionary = {
       "مستوحاة من المضيف — مكان للاجتماع وتبادل الحكايات واستقبال الضيوف.",
     bodyLine2: "نؤمن أن أفضل طريقة لاكتشاف العراق هي أن تشعر فيه بأنك في بيتك.",
     cta: "اعثر على مكانك في الحكاية",
+    expandAlt: "رسم نقش لمضيف، بيت الضيافة من القصب في أهوار الجنوب",
+    expandHint: "اسحب",
   },
   experiences: {
     index: "طرق السفر",

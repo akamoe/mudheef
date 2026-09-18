@@ -2,6 +2,11 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Dark mode is a class on <html>, set by next-themes before the first paint, so
+   the `dark:` utilities the shadcn primitives already carry follow this site's
+   toggle instead of the OS setting alone. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: var(--font-thmanyah-sans);
   --font-heading: var(--font-thmanyah-serif);
@@ -39,6 +44,40 @@
   --muted-foreground: #706b62;
   --border: #ded8cc;
   --orange: #e66c3f;
+  /* Secondary ink for the editorial copy: darker than --muted-foreground so
+     body text keeps the weight it was set at. --rule draws the dotted rules. */
+  --ink-soft: #514e47;
+  --ink-quiet: #605b52;
+  --rule: #c9bfae;
+  --selection: #e8c6ae;
+}
+
+/* The site is printed matter, so dark mode is the same plate seen under a lamp
+   at night: the ink turns to cream on a warm near-black, and the orange accent
+   lifts to hold its contrast. */
+.dark {
+  --background: #16140f;
+  --foreground: #f0eadc;
+  --card: #1e1b14;
+  --muted: #262218;
+  --muted-foreground: #a49c8d;
+  --border: #35302a;
+  --orange: #f0824f;
+  --ink-soft: #d9d2c3;
+  --ink-quiet: #bdb5a6;
+  --rule: #3a352d;
+  --selection: #5b422a;
+}
+
+/* Multiply drops the engraving's cream paper against a light page; against a
+   dark one it would erase the drawing, so dark mode reads the plate as a
+   negative instead: inverted paper goes dark, the drawn lines stay. */
+.dark .hero-landscape,
+.dark .story-expand .scroll-expand__media {
+  filter: invert(1) hue-rotate(180deg);
+}
+.dark .hero-landscape {
+  mix-blend-mode: screen;
 }
 @layer base {
   * {
@@ -62,7 +101,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   ::selection {
-    background: #e8c6ae;
+    background: var(--selection);
   }
 }
 .page-guides {
@@ -135,6 +174,38 @@ body {
   background: var(--foreground);
   color: var(--background);
 }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  color: var(--muted-foreground);
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+.theme-toggle:hover {
+  color: var(--foreground);
+}
+.theme-toggle svg {
+  width: 15px;
+  height: 15px;
+}
+/* Both icons ship in the markup and the dark class picks one, so the toggle
+   renders the same on the server and on the first client pass. */
+.theme-toggle .theme-icon-dark {
+  display: none;
+}
+.dark .theme-toggle .theme-icon-light {
+  display: none;
+}
+.dark .theme-toggle .theme-icon-dark {
+  display: block;
+}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -181,7 +252,7 @@ body {
   margin: 26px auto 25px;
   font-size: 16px;
   line-height: 1.7;
-  color: #514e47;
+  color: var(--ink-soft);
 }
 .explore-button {
   height: 52px;
@@ -264,7 +335,7 @@ h2 {
   margin-top: 20px;
   font-size: 15px;
   line-height: 1.7;
-  color: #605b52;
+  color: var(--ink-quiet);
 }
 .destination-grid {
   display: grid;
@@ -389,6 +460,67 @@ h2 {
   color: var(--muted-foreground);
   line-height: 1.8;
   margin: 23px auto 14px;
+}
+/* The mudhif plate is cream paper, so the expand frame speaks the site's
+   ink-and-paper language instead of the component's white-on-media defaults:
+   the held title sits on the plate in ink, and a paper scrim (rather than the
+   default dark one) clears the drawing behind the copy that fades in at full
+   bleed. The title and the copy are the hero's own lines. */
+.story-expand {
+  margin-top: 46px;
+}
+.story-expand .scroll-expand__title {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: clamp(38px, 3.8vw, 55px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  color: var(--foreground);
+  /* Keeps the held line legible where the engraving is at its busiest. */
+  text-shadow:
+    0 0 16px var(--background),
+    0 0 34px var(--background);
+}
+.story-expand .scroll-expand__hint {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.story-expand .scroll-expand__scrim {
+  background: linear-gradient(
+    to top,
+    var(--background),
+    color-mix(in oklab, var(--background) 55%, transparent) 55%,
+    transparent
+  );
+}
+.story-expand .scroll-expand__overlay {
+  gap: 14px;
+  padding: 0 7% 3%;
+  color: var(--foreground);
+}
+.story-expand .scroll-expand__overlay h3 {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: clamp(30px, 3vw, 44px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin: 0;
+}
+.story-expand .scroll-expand__overlay p {
+  max-width: 52ch;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+}
+/* Arabic joins its letters, so the tracking used for the Latin display type
+   has to come off. */
+[lang="ar"] .story-expand .scroll-expand__title,
+[lang="ar"] .story-expand .scroll-expand__hint,
+[lang="ar"] .story-expand .scroll-expand__overlay h3 {
+  letter-spacing: normal;
 }
 .site-footer {
   padding: 28px 5%;
@@ -643,6 +775,14 @@ a:focus-visible {
     min-width: 26px;
     padding: 0 5px;
   }
+  .theme-toggle {
+    width: 29px;
+    height: 27px;
+  }
+  .theme-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -682,6 +822,10 @@ a:focus-visible {
   .lang-option {
     min-width: 24px;
     padding: 0 4px;
+  }
+  .theme-toggle {
+    width: 26px;
+    height: 24px;
   }
 }
 
@@ -897,7 +1041,7 @@ a:focus-visible {
 .dialog-excerpt {
   font-size: 15px;
   line-height: 1.8;
-  color: #514e47;
+  color: var(--ink-soft);
   border-inline-start: 2px solid var(--orange);
   padding-inline-start: 18px;
 }
@@ -932,7 +1076,7 @@ a:focus-visible {
   inset-inline-start: 5px;
   top: 17px;
   bottom: 17px;
-  border-inline-start: 1px dotted #c9bfae;
+  border-inline-start: 1px dotted var(--rule);
 }
 .journey-route li {
   position: relative;
@@ -940,7 +1084,7 @@ a:focus-visible {
   padding-block: 7px;
   font-size: 14px;
   line-height: 1.45;
-  color: #605b52;
+  color: var(--ink-quiet);
 }
 .journey-route li::before {
   content: "";
@@ -1010,7 +1154,7 @@ a:focus-visible {
   margin-top: 7px;
   font-size: 14px;
   line-height: 1.6;
-  color: #605b52;
+  color: var(--ink-quiet);
 }
 .event-category {
   font-size: 10px;
@@ -1104,7 +1248,7 @@ a:focus-visible {
   margin: 0 auto;
   padding: 46px 44px;
   text-align: center;
-  border: 1px dashed #c9bfae;
+  border: 1px dashed var(--rule);
   background: color-mix(in srgb, var(--card) 65%, transparent);
 }
 .newsletter-coupon .section-index {
@@ -1118,7 +1262,7 @@ a:focus-visible {
   margin: 16px auto 30px;
   font-size: 14px;
   line-height: 1.7;
-  color: #605b52;
+  color: var(--ink-quiet);
 }
 .newsletter-form {
   display: flex;

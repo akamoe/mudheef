@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import localFont from "next/font/local"
 
 import { LanguageProvider } from "@/components/language-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import {
   defaultLocale,
   directionFor,
@@ -58,9 +59,14 @@ export default async function RootLayout({
       lang={locale}
       dir={directionFor(locale)}
       className={`${sans.variable} ${serif.variable} antialiased`}
+      // next-themes writes the theme class onto this element before React
+      // hydrates, so the server markup is expected to differ here.
+      suppressHydrationWarning
     >
       <body>
-        <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

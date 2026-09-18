@@ -22,6 +22,8 @@ import {
 
 import { LanguageToggle } from "@/components/language-toggle"
 import { useLanguage } from "@/components/language-provider"
+import { ThemeToggle } from "@/components/theme-toggle"
+import ScrollExpand from "@/components/ScrollExpand"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -219,6 +221,7 @@ export default function Page() {
         </a>
         <div className="header-actions">
           <LanguageToggle />
+          <ThemeToggle />
           <Button
             className="header-cta"
             variant="ghost"
@@ -646,6 +649,26 @@ export default function Page() {
           >
             {story.cta} <ArrowUpRight data-icon="inline-end" />
           </Button>
+          {/* The mudhif plate opens to full bleed on the page scroll: the hero's
+              land-of-stories line holds over the resting frame, then hands the
+              stage to the hero's invitation as the engraving fills it. */}
+          <ScrollExpand
+            className="story-expand"
+            src="/images/mudhif-engraving.webp"
+            alt={story.expandAlt}
+            title={`${hero.titleLine1} ${hero.titleLine2}`}
+            scrollHint={story.expandHint}
+            startWidth={56}
+            startHeight={46}
+            mediaZoom={1.25}
+            scrollDistance={0.8}
+            holdDistance={0.2}
+            overlayScrim={0.95}
+            useWindowScroll
+          >
+            <h3>{hero.bodyLine1}</h3>
+            <p>{hero.bodyLine2}</p>
+          </ScrollExpand>
         </section>
         <Newsletter />
       </main>
