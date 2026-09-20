@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { useCallback, useEffect, useRef } from "react"
 
 import "./ScrollExpand.css"
@@ -204,11 +205,15 @@ const ScrollExpand = ({
         playsInline
       />
     ) : (
-      <img
+      // A real <img> under the hood, so the optimizer can hand the browser a
+      // right-sized file; `fill` matches the frame it is scaled inside.
+      <Image
         ref={mediaRef}
         className="scroll-expand__media"
         src={src}
         alt={alt}
+        fill
+        sizes="100vw"
         draggable={false}
       />
     )

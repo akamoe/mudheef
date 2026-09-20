@@ -221,11 +221,18 @@ export default function Page() {
               {hero.cta} <ArrowUpRight data-icon="inline-end" />
             </Button>
           </div>
-          <div
-            className="hero-landscape"
-            role="img"
-            aria-label={a11y.heroArt}
-          />
+          <div className="hero-landscape" role="img" aria-label={a11y.heroArt}>
+            {/* The plate is the first thing on the page, so it is optimized and
+                starts loading with the document. `sizes="100vw"` gives the
+                browser a full srcset to pick from. */}
+            <Image
+              src="/images/mudhif-engraving.webp"
+              alt=""
+              fill
+              sizes="100vw"
+              preload
+            />
+          </div>
           <p className="margin-note left-note">
             <MarginNote lines={hero.noteLeft} />
           </p>
@@ -283,7 +290,14 @@ export default function Page() {
                         className={`destination-art ${place.art}`}
                         role="img"
                         aria-label={place.artAlt}
-                      />
+                      >
+                        <Image
+                          src={`/images/destinations/${place.art}.webp`}
+                          alt=""
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1000px) 32vw, 440px"
+                        />
+                      </div>
                     </CardContent>
                     <CardFooter>
                       <span>{place.location}</span>
@@ -316,7 +330,14 @@ export default function Page() {
                       className={`destination-art dialog-art ${place.art}`}
                       role="img"
                       aria-label={place.artAlt}
-                    />
+                    >
+                      <Image
+                        src={`/images/destinations/${place.art}.webp`}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, 400px"
+                      />
+                    </div>
                     <p className="dialog-note">{place.note}</p>
                   </DialogContent>
                 </Dialog>

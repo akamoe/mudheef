@@ -250,7 +250,10 @@ body {
 }
 .hero {
   position: relative;
-  height: 860px;
+  /* The plate is 3:2 and starts 300px down, so the hero has to be that tall
+     for it to sit below the copy without being stretched. The band keeps its
+     own ratio; the hero grows to hold it. */
+  height: calc(280px + 100vw / 1.5);
   overflow: hidden;
 }
 .hero-copy {
@@ -281,15 +284,11 @@ body {
 }
 .hero-landscape {
   position: absolute;
-  /* Bottom-pinned at the plate's own 3:2 ratio. The old `inset: 300px 0 -20px`
-     made a ~2.5:1 box on a 1440px page and `100% 100%` then squeezed the
-     drawing to fit it. Letting the top edge run past the hero (which clips it)
-     keeps the proportions; what gets clipped is empty sky, which the mask
-     fades anyway. */
+  /* Bottom-pinned at the plate's own 3:2 ratio, so it is never stretched. The
+     hero above is sized to match, which keeps the top edge at 300px — below
+     the copy — at every width. */
   inset: auto 0 -20px;
   aspect-ratio: 3 / 2;
-  background: url("/images/mudhif-engraving.webp") center bottom / 100% 100%
-    no-repeat;
   mix-blend-mode: multiply;
   pointer-events: none;
   mask-image: linear-gradient(
@@ -299,6 +298,12 @@ body {
     black 84%,
     transparent 100%
   );
+}
+/* The plate is a real <img> now (so the optimizer can size it), so it needs the
+   framing the CSS background used to provide. */
+.hero-landscape img {
+  object-fit: cover;
+  object-position: center top;
 }
 .margin-note {
   position: absolute;
@@ -438,20 +443,12 @@ h2 {
   padding: 0;
 }
 .destination-art {
+  position: relative;
   height: 290px;
-  background-image: url("/images/destination-triptych.webp");
-  background-repeat: no-repeat;
-  /* Show one third of the artwork without stretching its height. */
-  background-size: 300% auto;
+  overflow: hidden;
 }
-.babylon {
-  background-position: left center;
-}
-.marshes {
-  background-position: center;
-}
-.baghdad {
-  background-position: right center;
+.destination-art img {
+  object-fit: cover;
 }
 .destination-card [data-slot="card-footer"] {
   padding: 12px 18px;
@@ -614,12 +611,6 @@ a:focus-visible {
        ultra-wides. */
     height: calc(280px + min(100vw / 1.5, 1400px));
   }
-  .hero-landscape {
-    /* Stay in proportion and pin to the water line, so whatever the
-       viewport width, the fade always dissolves the water and reeds. */
-    background-position: center bottom;
-    background-size: 100% auto;
-  }
 }
 @media (max-width: 1000px) {
   .header-nav {
@@ -627,9 +618,6 @@ a:focus-visible {
   }
   .brand-alt {
     display: none;
-  }
-  .hero {
-    height: 780px;
   }
   .hero-copy {
     padding-top: 66px;
@@ -718,8 +706,9 @@ a:focus-visible {
     display: none;
   }
   .hero-landscape {
+    /* On phones the plate overscans sideways and crops, rather than shrinking
+       the copy off the fold. */
     inset: 295px -155px 0;
-    background-size: cover;
   }
   .explore-button {
     min-width: 170px;
