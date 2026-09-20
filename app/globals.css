@@ -281,8 +281,14 @@ body {
 }
 .hero-landscape {
   position: absolute;
-  inset: 300px 0 -20px;
-  background: url("/images/mudhif-engraving.webp") center top / 100% 100%
+  /* Bottom-pinned at the plate's own 3:2 ratio. The old `inset: 300px 0 -20px`
+     made a ~2.5:1 box on a 1440px page and `100% 100%` then squeezed the
+     drawing to fit it. Letting the top edge run past the hero (which clips it)
+     keeps the proportions; what gets clipped is empty sky, which the mask
+     fades anyway. */
+  inset: auto 0 -20px;
+  aspect-ratio: 3 / 2;
+  background: url("/images/mudhif-engraving.webp") center bottom / 100% 100%
     no-repeat;
   mix-blend-mode: multiply;
   pointer-events: none;
@@ -628,9 +634,6 @@ a:focus-visible {
   .hero-copy {
     padding-top: 66px;
   }
-  .hero-landscape {
-    top: 280px;
-  }
   .margin-note {
     display: none;
   }
@@ -650,27 +653,34 @@ a:focus-visible {
 }
 @media (max-width: 640px) {
   .site-header {
-    height: 80px;
-    padding: 0 20px;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 8px;
+    /* Brand and toggles keep the top row; the nav drops to a second row so
+       every link stays reachable. Three links (and the Karbala page's four) do
+       not fit beside the brand and both toggles on a phone, and an overflowing
+       nav widened the whole page. */
+    height: auto;
+    padding: 12px 20px;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    column-gap: 8px;
+    row-gap: 10px;
   }
   .brand-link {
-    grid-column: 1;
-    grid-row: 1;
+    grid-area: brand;
     justify-self: start;
   }
   .brand {
     font-size: 27px;
   }
   .header-nav {
-    grid-column: 2;
-    grid-row: 1;
+    grid-area: nav;
     justify-self: center;
+    justify-content: center;
+    flex-wrap: wrap;
   }
   .header-actions {
-    grid-column: 3;
-    grid-row: 1;
+    grid-area: actions;
   }
   .header-nav [data-slot="button"] {
     font-size: 11px;
@@ -1166,6 +1176,13 @@ a:focus-visible {
 .journey-card {
   display: grid;
   grid-template-rows: auto minmax(190px, 1fr) auto;
+  /* The card holds a WebGL canvas. A `filter` on an ancestor paints the whole
+     card into an offscreen surface, and browsers rasterize that surface below
+     device resolution, which is what made the route maps read soft. The same
+     lift is drawn with a box-shadow, which composites the canvas directly. The
+     artwork cards keep the contoured drop-shadow. */
+  filter: none;
+  box-shadow: 0 5px 9px #3f342014;
 }
 /* Grid, not block: it lets the map stretch to whatever the row turns out to be,
    so it stays flush with the footer instead of leaving a gap above it. */
@@ -1781,14 +1798,10 @@ a:focus-visible {
 .footer-nav a:hover {
   color: var(--foreground);
 }
-/* Three nav links plus the brand and both toggles do not fit on one row at
-   320px, and the header is already tight at two. The link stays in the footer
-   below this width, so the page is never unreachable. */
-@media (max-width: 640px) {
-  .header-nav .nav-wide {
-    display: none;
-  }
-}
+/* Three nav links plus the brand and both toggles do not fit on one row on a
+   phone, so the header deliberately wraps the nav onto its own row (see the
+   `max-width: 640px` block above) rather than dropping a link: the Karbala link
+   is a route, not an anchor, and has to stay in front of the visitor. */
 
 /* --- The shrine plate on /karbala --- */
 

@@ -195,7 +195,7 @@ export default function Page() {
       <SiteHeader
         links={[
           { label: header.destinations, href: "#destinations" },
-          { label: header.karbala, href: "/karbala", className: "nav-wide" },
+          { label: header.karbala, href: "/karbala" },
           { label: header.story, href: "#our-story" },
         ]}
         cta={{ label: header.cta, href: "#destinations" }}

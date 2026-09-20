@@ -108,8 +108,9 @@ function SiteFooter({ links = [] }: { links?: NavLink[] }) {
         <Brand />
       </Link>
       <p>{messages.footer.tagline}</p>
-      {/* The footer carries whatever the header had to drop to stay on one
-          row. See the mobile rule for `.nav-wide` in `globals.css`. */}
+      {/* The footer keeps a link back to every route the page offers. The
+          header no longer drops anything on narrow screens — it wraps the nav
+          onto its own row — so this is now a convenience, not a fallback. */}
       {links.length > 0 ? (
         <nav className="footer-nav" aria-label={messages.a11y.footerNav}>
           {links.map((link) => (

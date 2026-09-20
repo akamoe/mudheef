@@ -29,11 +29,13 @@ import { cn } from "@/lib/utils";
 // map then starts a worker from a 404, never parses a tile, and renders blank.
 //
 // `scripts/copy-maplibre-worker.mjs` serves the worker, and the shared chunk it
-// imports, from `public/maplibre/` — same origin, no CDN. Re-running
-// `shadcn add @mapcn/map` overwrites this file: reapply this block and keep the
-// script it names.
+// imports, from `public/maplibre/` — same origin, no CDN. It writes them as
+// `.js`, not `.mjs`: MapLibre 6 starts a module worker, and a host that answers
+// `.mjs` with `text/plain` (Hostinger does) makes the browser refuse it, which
+// leaves every map blank. Re-running `shadcn add @mapcn/map` overwrites this
+// file: reapply this block and keep the script it names.
 if (typeof window !== "undefined") {
-  MapLibreGL.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+  MapLibreGL.setWorkerUrl("/maplibre/maplibre-gl-worker.js");
 }
 
 const defaultStyles = {
