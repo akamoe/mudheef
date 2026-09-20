@@ -1,6 +1,6 @@
 "use client"
 
-import { createRef, Fragment, useRef, useState } from "react"
+import { createRef, useRef, useState } from "react"
 import Image from "next/image"
 import {
   ArrowDown,
@@ -20,10 +20,15 @@ import {
   Wind,
 } from "lucide-react"
 
-import { LanguageToggle } from "@/components/language-toggle"
+import { DocumentTitle } from "@/components/document-title"
 import { useLanguage } from "@/components/language-provider"
 import { JourneyMap } from "@/components/journey-map"
-import { ThemeToggle } from "@/components/theme-toggle"
+import {
+  Brand,
+  MarginNote,
+  SiteFooter,
+  SiteHeader,
+} from "@/components/site-chrome"
 import ScrollExpand from "@/components/ScrollExpand"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { Badge } from "@/components/ui/badge"
@@ -45,6 +50,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
@@ -67,47 +77,27 @@ const experienceIcons: Record<ExperienceIcon, typeof Landmark> = {
 }
 
 /** Vintage plates for the chips. Add a key here and the chip switches to a
- *  photo; anything without one keeps its icon. */
+ *  photo; anything without one keeps its icon.
+ *
+ *  These are 800px masters, centre-cropped from the ~1374px PNGs the art was
+ *  drawn at (`~/Documents/Projects/visit/`: `holy shrine.png`, `masgof.png`,
+ *  `naouroz.png`, `ahoar.png`, `crafting.png`, `walking.png`). One file feeds
+ *  both sizes: the chip asks for 64px, the hover card for 260px, and next/image
+ *  serves each from the master. They were 160px once, which is why the card's
+ *  plate looked soft — it was stretching 160px across ~520 device pixels.
+ *
+ *  The `-800` in the filename is load-bearing: next/image derives variants from
+ *  the src URL and caches them for `images.minimumCacheTTL` (4 hours by
+ *  default), keyed by URL alone. Replacing a file's bytes without changing its
+ *  path leaves hours of stale variants being served, so regenerating a plate at
+ *  a new size means renaming it too. */
 const experienceImages: Partial<Record<ExperienceIcon, string>> = {
-  faith: "/images/experiences/faith.webp",
-  food: "/images/experiences/food.webp",
-  music: "/images/experiences/music.webp",
-  water: "/images/experiences/water.webp",
-  craft: "/images/experiences/craft.webp",
-  walk: "/images/experiences/walk.webp",
-}
-
-/** The header mark is the Arabic wordmark on its own — the English lockup is
- *  only used in the footer. */
-function Brand({ mark = false }: { mark?: boolean }) {
-  const { messages } = useLanguage()
-
-  return (
-    <span className="brand">
-      <span className="brand-name" lang={mark ? "ar" : undefined}>
-        {mark ? messages.brand.logo : messages.brand.name}
-      </span>
-      {mark ? null : (
-        <span className="brand-alt" lang={messages.brand.altLang}>
-          {messages.brand.alt}
-        </span>
-      )}
-    </span>
-  )
-}
-
-function MarginNote({ lines }: { lines: string[] }) {
-  return (
-    <>
-      {lines.map((line, index) => (
-        <Fragment key={line}>
-          {index > 0 ? <br /> : null}
-          {line}
-        </Fragment>
-      ))}
-      <span />
-    </>
-  )
+  faith: "/images/experiences/faith-800.webp",
+  food: "/images/experiences/food-800.webp",
+  music: "/images/experiences/music-800.webp",
+  water: "/images/experiences/water-800.webp",
+  craft: "/images/experiences/craft-800.webp",
+  walk: "/images/experiences/walk-800.webp",
 }
 
 function Newsletter() {
@@ -186,7 +176,6 @@ export default function Page() {
     events,
     journal,
     story,
-    footer,
     a11y,
   } = messages
 
@@ -198,43 +187,19 @@ export default function Page() {
 
   return (
     <>
+      <DocumentTitle title={messages.meta.title} />
       <a href="#main" className="skip-link">
         {a11y.skip}
       </a>
       <div className="page-guides" aria-hidden="true" />
-      <header className="site-header">
-        <nav className="header-nav" aria-label={a11y.primaryNav}>
-          <Button
-            variant="ghost"
-            render={<a href="#destinations" />}
-            nativeButton={false}
-          >
-            {header.destinations}
-          </Button>
-          <Button
-            variant="ghost"
-            render={<a href="#our-story" />}
-            nativeButton={false}
-          >
-            {header.story}
-          </Button>
-        </nav>
-        <a href="#" className="brand-link" aria-label={a11y.home}>
-          <Brand mark />
-        </a>
-        <div className="header-actions">
-          <LanguageToggle />
-          <ThemeToggle />
-          <Button
-            className="header-cta"
-            variant="ghost"
-            render={<a href="#destinations" />}
-            nativeButton={false}
-          >
-            {header.cta} <ArrowUpRight data-icon="inline-end" />
-          </Button>
-        </div>
-      </header>
+      <SiteHeader
+        links={[
+          { label: header.destinations, href: "#destinations" },
+          { label: header.karbala, href: "/karbala", className: "nav-wide" },
+          { label: header.story, href: "#our-story" },
+        ]}
+        cta={{ label: header.cta, href: "#destinations" }}
+      />
       <main id="main">
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
@@ -407,55 +372,98 @@ export default function Page() {
 
                 return (
                   <li key={item.id} ref={chipRefs[index]}>
-                    <Dialog>
-                      <DialogTrigger
-                        render={
-                          <Button
-                            variant="outline"
-                            className="experience-chip"
-                          />
-                        }
-                      >
-                        {photo ? (
-                          <Image
-                            className="experience-chip-art"
-                            src={photo}
-                            alt=""
-                            width={64}
-                            height={64}
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <span
-                            className="experience-chip-icon"
-                            aria-hidden="true"
-                          >
-                            <Icon />
-                          </span>
-                        )}
-                        {item.label}
-                      </DialogTrigger>
-                      <DialogContent className="section-dialog">
-                        <DialogHeader>
-                          <p className="section-index">{item.label}</p>
-                          <DialogTitle>{item.title}</DialogTitle>
-                          <DialogDescription>{item.detail}</DialogDescription>
-                        </DialogHeader>
-                        <div className="dialog-places">
-                          <p className="section-index">
-                            {experiences.placesLabel}
-                          </p>
-                          <ul>
-                            {item.places.map((place) => (
-                              <li key={place}>
-                                <MapPin aria-hidden="true" />
-                                {place}
-                              </li>
-                            ))}
-                          </ul>
+                    <HoverCard>
+                      <Dialog>
+                        {/* One chip, two surfaces: hovering previews the
+                            thread, clicking still opens the full dialog.
+                            Chaining the triggers keeps a single button in
+                            the DOM instead of nesting a second hit area. */}
+                        <HoverCardTrigger
+                          delay={150}
+                          render={
+                            <DialogTrigger
+                              render={
+                                <Button
+                                  variant="outline"
+                                  className="experience-chip"
+                                />
+                              }
+                            />
+                          }
+                        >
+                          {photo ? (
+                            <Image
+                              className="experience-chip-art"
+                              src={photo}
+                              alt=""
+                              width={64}
+                              height={64}
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span
+                              className="experience-chip-icon"
+                              aria-hidden="true"
+                            >
+                              <Icon />
+                            </span>
+                          )}
+                          {item.label}
+                        </HoverCardTrigger>
+                        <DialogContent className="section-dialog">
+                          <DialogHeader>
+                            <p className="section-index">{item.label}</p>
+                            <DialogTitle>{item.title}</DialogTitle>
+                            <DialogDescription>{item.detail}</DialogDescription>
+                          </DialogHeader>
+                          <div className="dialog-places">
+                            <p className="section-index">
+                              {experiences.placesLabel}
+                            </p>
+                            <ul>
+                              {item.places.map((place) => (
+                                <li key={place}>
+                                  <MapPin aria-hidden="true" />
+                                  {place}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      {/* Asked for at the 260px the popup is laid out at, so
+                          a 2x screen pulls the 640px variant off the master
+                          rather than stretching a small file. */}
+                      <HoverCardContent className="experience-hover">
+                        <div className="experience-hover-plate">
+                          {photo ? (
+                            <Image
+                              src={photo}
+                              alt=""
+                              width={800}
+                              height={800}
+                              sizes="260px"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span
+                              className="experience-hover-icon"
+                              aria-hidden="true"
+                            >
+                              <Icon />
+                            </span>
+                          )}
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                        <div className="experience-hover-copy">
+                          {/* The title already names the thread, so the chip's
+                              label would only repeat it. */}
+                          <p className="experience-hover-title">{item.title}</p>
+                          <p className="experience-hover-detail">
+                            {item.detail}
+                          </p>
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   </li>
                 )
               })}
@@ -697,15 +705,7 @@ export default function Page() {
         <Newsletter />
       </main>
       <Separator />
-      <footer className="site-footer">
-        <a href="#" aria-label={a11y.home}>
-          <Brand />
-        </a>
-        <p>{footer.tagline}</p>
-        <span>
-          © {new Date().getFullYear()} {footer.name}
-        </span>
-      </footer>
+      <SiteFooter links={[{ label: header.karbala, href: "/karbala" }]} />
     </>
   )
 }

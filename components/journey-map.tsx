@@ -27,9 +27,10 @@ export type JourneyMapStop = {
 /**
  * The brand orange, spelled out twice because MapLibre paints the route into
  * WebGL and cannot resolve a CSS custom property. Keep in step with `--orange`
- * in `globals.css` (light, then dark).
+ * in `globals.css` (light, then dark). Exported so the Karbala map draws its
+ * circuit in the same two colours instead of keeping a second copy.
  */
-const ROUTE_COLORS = { light: "#e66c3f", dark: "#f0824f" }
+export const ROUTE_COLORS = { light: "#e66c3f", dark: "#f0824f" }
 
 /**
  * Everything that lives inside the map context: the route, the numbered stop

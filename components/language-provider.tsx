@@ -44,8 +44,9 @@ function LanguageProvider({
     const root = document.documentElement
     root.lang = locale
     root.dir = dir
-    document.title = messages.meta.title
-  }, [locale, dir, messages.meta.title])
+    // The tab title is not set here: the provider does not know which page it
+    // is rendering. Each page names itself with `<DocumentTitle>`.
+  }, [locale, dir])
 
   const value = React.useMemo(
     () => ({ locale, dir, messages, setLocale }),

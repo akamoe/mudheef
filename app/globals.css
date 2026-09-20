@@ -104,13 +104,13 @@
     background: var(--selection);
   }
   .maplibregl-popup-content {
-    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+    @apply rounded-none! bg-transparent! p-0! shadow-none!;
   }
   .maplibregl-popup-tip {
     @apply hidden!;
   }
   .maplibregl-ctrl-attrib {
-    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+    @apply rounded-md! border! border-border! bg-background! text-muted-foreground! shadow-sm!;
   }
   .maplibregl-ctrl-attrib a {
     @apply text-muted-foreground!;
@@ -922,12 +922,19 @@ a:focus-visible {
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
+/* The rail sits in a box no wider than it needs, so the chips stay near the
+   medallion however wide the viewport gets. */
 .experience-threads {
   position: relative;
   isolation: isolate;
-  max-width: 900px;
+  max-width: 620px;
   margin: 28px auto 0;
 }
+/* Column gap is the chip-to-medallion air: the middle column is the medallion's
+   100px, so the chips stop 48px off the circle instead of at the outer edges of
+   the section. Equal `1fr` side columns keep the medallion on the centre line
+   whatever the labels measure, and a chip wider than its column overflows away
+   from the medallion, never over it. */
 .experience-rail {
   position: relative;
   z-index: 1;
@@ -937,16 +944,16 @@ a:focus-visible {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 100px minmax(0, 1fr);
   grid-template-rows: repeat(3, 70px);
-  gap: 38px 24px;
+  gap: 38px 48px;
 }
 .experience-rail > li {
   grid-column: 1;
-  justify-self: start;
+  justify-self: end;
   align-self: center;
 }
 .experience-rail > li:nth-child(n + 4) {
   grid-column: 3;
-  justify-self: end;
+  justify-self: start;
 }
 .experience-rail > li:nth-child(3n + 1) {
   grid-row: 1;
@@ -1009,6 +1016,59 @@ a:focus-visible {
   width: 17px;
   height: 17px;
   color: var(--orange);
+}
+/* Chip preview card. The width, radius and padding are re-dressed here because
+   the primitive carries them as Tailwind utilities (`w-72`, `p-4`,
+   `rounded-3xl`) and unlayered CSS in this file wins over layered utilities —
+   the same way `.section-dialog` re-dresses Dialog. The surface itself (ring +
+   shadow) is left alone so the card matches the dialogs. */
+.experience-hover {
+  width: 260px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+/* The plate fills the card's width, the way the registry's example sets its
+   banner. The source art is square, so 4:3 trims it rather than letterboxes
+   it; the muted fill shows through while the file loads. */
+.experience-hover-plate {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--muted);
+  border-bottom: 1px dotted var(--border);
+}
+.experience-hover-plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.experience-hover-icon {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--orange);
+}
+.experience-hover-icon svg {
+  width: 42px;
+  height: 42px;
+}
+.experience-hover-copy {
+  padding: 14px 16px 16px;
+}
+.experience-hover-title {
+  margin: 0;
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+}
+.experience-hover-detail {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-soft);
 }
 .section-dialog {
   max-height: 90svh;
@@ -1417,7 +1477,7 @@ a:focus-visible {
   .experience-rail {
     grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
     grid-template-rows: repeat(3, 90px);
-    gap: 22px 8px;
+    gap: 22px 14px;
   }
   .experience-rail > li {
     width: 100%;
@@ -1525,4 +1585,241 @@ a:focus-visible {
 }
 [dir="rtl"] .newsletter-consent [data-slot="label"] {
   line-height: 1.9;
+}
+
+/* --- Karbala city page --- */
+
+/* The city section: the history reads as prose, the fact sheet reads as a
+   record. Two columns, prose wider, facts pinned to the top of the second. */
+.city-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 56px;
+  margin-top: 48px;
+  align-items: start;
+}
+.city-prose h3 {
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.6px;
+  margin: 0 0 20px;
+}
+.city-prose p {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+}
+/* Same treatment as the journal's pull line, so a large line reads the same
+   wherever it appears on the site. Scoped through `.city-prose` because the
+   paragraph rule above it is the more specific of the two selectors. */
+.city-prose .city-pull {
+  margin: 28px 0 0;
+  border-inline-start: 2px solid var(--orange);
+  padding-inline-start: 18px;
+  font-family: var(--font-thmanyah-serif), Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.4px;
+  color: var(--foreground);
+  text-wrap: balance;
+}
+.city-facts {
+  border-top: 1px dotted var(--border);
+  padding-top: 24px;
+}
+.city-facts .section-index {
+  margin: 0 0 16px;
+}
+.city-facts dl {
+  margin: 0;
+}
+.city-facts dl > div {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px dotted var(--border);
+}
+.city-facts dt {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  padding-top: 3px;
+}
+.city-facts dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* --- Sites --- */
+
+/* The destinations ticket with the illustrated plate taken out. The header's
+   min-height is inherited from that card, so the thirteen tickets keep one
+   shape; the rows put the footer on the bottom edge whatever the copy does. */
+.site-card {
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+.site-see {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-quiet);
+}
+
+/* --- The map --- */
+
+.karbala-map-shell {
+  margin-top: 44px;
+}
+/* Two framings of one map: the old city on foot, and the ring around it by
+   car. Buttons rather than tabs because the map below is the panel. */
+.karbala-map-views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.karbala-map-view {
+  height: auto;
+  padding: 10px 18px;
+  border-radius: 999px;
+  gap: 10px;
+}
+.karbala-map-view-label {
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+.karbala-map-view-hint {
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+/* The pressed button is inverted ink, so the hint has to come back off the
+   muted colour it sits on in the outline state. */
+.karbala-map-view[aria-pressed="false"] .karbala-map-view-hint {
+  color: var(--muted-foreground);
+}
+/* One map, tall enough for the circuit: 60 km of desert needs the height
+   before it needs the width. */
+.karbala-map {
+  position: relative;
+  direction: ltr;
+  height: 520px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+/* The map is forced to ltr so MapLibre's controls don't mirror; popup copy is
+   prose and follows the page, which the `[dir="rtl"] .journey-popup` rule
+   above handles because this map reuses that popup. */
+[dir="rtl"] .city-prose h3,
+[dir="rtl"] .city-prose .city-pull {
+  letter-spacing: normal;
+}
+[dir="rtl"] .city-facts dt,
+[dir="rtl"] .karbala-map-view-hint {
+  letter-spacing: normal;
+  text-transform: none;
+}
+[dir="rtl"] .city-prose p,
+[dir="rtl"] .city-facts dd,
+[dir="rtl"] .site-see {
+  line-height: 1.9;
+}
+
+@media (max-width: 1000px) {
+  .city-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+  .karbala-map {
+    height: 440px;
+  }
+}
+@media (max-width: 640px) {
+  .city-prose p {
+    font-size: 14px;
+  }
+  .city-facts dl > div {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .karbala-map-views {
+    gap: 8px;
+  }
+  .karbala-map-view {
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 9px 14px;
+  }
+  .karbala-map {
+    height: 380px;
+  }
+}
+/* The footer's second nav. Mirrors the header's ghost links so a page that is
+   reachable from one is reachable from the other, and carries the pages the
+   header has to drop on narrow screens. */
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 11px;
+}
+.footer-nav a {
+  color: var(--muted-foreground);
+  transition: color 150ms ease;
+}
+.footer-nav a:hover {
+  color: var(--foreground);
+}
+/* Three nav links plus the brand and both toggles do not fit on one row at
+   320px, and the header is already tight at two. The link stays in the footer
+   below this width, so the page is never unreachable. */
+@media (max-width: 640px) {
+  .header-nav .nav-wide {
+    display: none;
+  }
+}
+
+/* --- The shrine plate on /karbala --- */
+
+/* The engraving is read as a negative in dark mode because it is cream paper
+   and dark ink. The shrine plate has colour to lose — inverting it turns gold
+   to violet and palms to pink — so it is shown as it is. The scrim it fades in
+   with is already drawn in `--background`, so the copy over it keeps its
+   contrast either way. */
+.dark .story-expand.shrine-expand .scroll-expand__media {
+  filter: none;
+}
+
+/* The Karbala intro has no plate behind it, so the hero is only as tall as its
+   copy. `height: auto` (rather than the landing's fixed 860px, which is sized
+   around the engraving) keeps it from ending in a pool of empty paper, and the
+   left margin note is pinned to the hero's foot instead of 405px from its head,
+   because that measurement assumed the taller box. */
+.hero.hero-copy-only {
+  height: auto;
+  padding-bottom: 10px;
+}
+.hero.hero-copy-only .left-note {
+  top: auto;
+  bottom: 46px;
+}
+/* The plate band under it: the landing's story section with its copy taken out
+   and moved into the plate itself, so the 46px that copy held above the
+   ScrollExpand goes with it. */
+.our-story.plate-band {
+  padding-top: 26px;
+}
+.plate-band .story-expand {
+  margin-top: 0;
 }

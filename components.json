@@ -23,6 +23,7 @@
   "menuAccent": "subtle",
   "registries": {
     "@magicui": "https://magicui.design/r/{name}",
-    "@mapcn": "https://mapcn.dev/r/{name}.json"
+    "@mapcn": "https://mapcn.dev/r/{name}.json",
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }

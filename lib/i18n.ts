@@ -1,4 +1,4 @@
-import type { PlaceId } from "@/lib/places"
+import type { KarbalaSiteId, PlaceId } from "@/lib/places"
 
 export const locales = ["en", "ar"] as const
 
@@ -74,6 +74,71 @@ export type PlaceInfo = {
   see: string
 }
 
+/** The marker a site gets on the Karbala map and on its card. */
+export type KarbalaSiteIcon =
+  | "shrine"
+  | "axis"
+  | "standard"
+  | "bridge"
+  | "fortress"
+  | "church"
+  | "palace"
+  | "marker"
+  | "cave"
+  | "khan"
+  | "spring"
+
+/**
+ * One historical site in Karbala or its governorate.
+ *
+ * The same entry feeds three surfaces: the card, its dialog, and the map
+ * popup — so the popup's "what it is" line is the card's own `description`
+ * and cannot drift from it.
+ */
+export type KarbalaSite = {
+  /** Stable key into `karbalaSites` in `lib/places.ts`. */
+  id: KarbalaSiteId
+  number: string
+  name: string
+  /** What sort of place it is: "Holy shrine", "Ottoman caravansarai". */
+  kind: string
+  /** How far out it sits: "City centre", "About 50 km south-west". */
+  area: string
+  icon: KarbalaSiteIcon
+  /** The card's two lines, reused verbatim as the map popup's note. */
+  description: string
+  /** The dialog's longer account. */
+  detail: string
+  /** The one thing not to leave without seeing. */
+  see: string
+}
+
+export type KarbalaTourismId =
+  | "religious"
+  | "archaeological"
+  | "natural"
+  | "educational"
+  | "medical"
+
+export type KarbalaTourismItem = {
+  id: KarbalaTourismId
+  name: string
+  description: string
+  cta: string
+  href: string
+}
+
+/** One framing of the Karbala map: a group of sites that belong together. */
+export type KarbalaMapView = {
+  /** Key used to switch views; the city view and the ring around it. */
+  id: "city" | "region"
+  label: string
+  /** The line under the label: how many stops, and how they are made. */
+  hint: string
+  /** The sites this view draws, in the order the route runs. */
+  stops: KarbalaSiteId[]
+}
+
 export type EventItem = {
   /** A window, not a fixed date — the copy says so out loud. Arabic uses
    *  spelled-out month names rather than the Latin abbreviations. */
@@ -115,9 +180,10 @@ export type Dictionary = {
     scrollToDestinations: string
     experiencesList: string
     newsletterForm: string
+    footerNav: string
   }
   theme: { label: string }
-  header: { destinations: string; story: string; cta: string }
+  header: { destinations: string; story: string; karbala: string; cta: string }
   hero: {
     titleLine1: string
     titleLine2: string
@@ -204,6 +270,90 @@ export type Dictionary = {
     submit: string
     success: string
   }
+  /** The Karbala city page at `/karbala`: the city, its sites, and their map. */
+  karbala: {
+    meta: { title: string; description: string }
+    /** Header links, all in-page anchors of this page. */
+    nav: { city: string; tourism: string; sites: string; map: string; all: string }
+    hero: {
+      titleLine1: string
+      titleLine2: string
+      bodyLine1: string
+      bodyLine2: string
+      cta: string
+      noteLeft: string[]
+      noteRight: string[]
+    }
+    city: {
+      index: string
+      titleLine1: string
+      titleLine2: string
+      bodyLine1: string
+      bodyLine2: string
+      /** Heading over the history prose, beside the fact sheet. */
+      historyTitle: string
+      /** The history, one entry per paragraph. */
+      history: string[]
+      /** One line set large between the prose and the fact sheet. */
+      pull: string
+      factsLabel: string
+      facts: { label: string; value: string }[]
+    }
+    tourism: {
+      index: string
+      titleLine1: string
+      titleLine2: string
+      bodyLine1: string
+      bodyLine2: string
+      items: KarbalaTourismItem[]
+    }
+    sites: {
+      index: string
+      titleLine1: string
+      titleLine2: string
+      bodyLine1: string
+      bodyLine2: string
+      /** Label beside the "worth seeing" line in a site dialog. */
+      seeLabel: string
+      /** Accessible name for a site card's button, read before the name. */
+      openLabel: string
+      collectionNote: string
+      items: KarbalaSite[]
+    }
+    maps: {
+      index: string
+      titleLine1: string
+      titleLine2: string
+      bodyLine1: string
+      bodyLine2: string
+      /** Accessible name for the map region. */
+      mapLabel: string
+      /** Label over the view switcher. */
+      viewLabel: string
+      /** Word before the number in a map popup. */
+      stopLabel: string
+      /** Label above the "worth seeing" line in a map popup. */
+      seeLabel: string
+      views: KarbalaMapView[]
+    }
+    /** The shrine plate that sits under the intro: the landing page's
+     *  scroll-expand component, moved to the top of this page and standing on
+     *  its own — which is why it carries the lines it used to sit beside. */
+    plate: {
+      /** Accessible name for the band; the plate itself has no printed title. */
+      label: string
+      /** The line held over the plate before it opens. */
+      heldLine: string
+      /** The heading that fades in once the plate fills the screen. */
+      overlayTitle: string
+      /** The line under it. */
+      overlayBody: string
+      /** Alt text for the plate. */
+      expandAlt: string
+      /** The scroll cue printed at the foot of the plate. */
+      expandHint: string
+    }
+  }
   footer: { tagline: string; name: string }
 }
 
@@ -229,10 +379,12 @@ const en: Dictionary = {
     scrollToDestinations: "Scroll to destinations",
     experiencesList: "Ways to travel",
     newsletterForm: "Newsletter sign-up",
+    footerNav: "Also on Mudheef",
   },
   header: {
     destinations: "Destinations",
     story: "Our story",
+    karbala: "Karbala",
     cta: "Find your next story",
   },
   hero: {
@@ -675,6 +827,364 @@ const en: Dictionary = {
     success: "Thank you — check your inbox to confirm.",
   },
   footer: { tagline: "Made of stories. Rooted in Iraq.", name: "Mudheef" },
+  karbala: {
+    meta: {
+      title: "Karbala — The city of the two shrines",
+      description:
+        "The city that grew around the shrines of Imam Husayn and Al-Abbas, and the thirteen historical sites of Karbala governorate, with a map of each.",
+    },
+    nav: {
+      city: "The city",
+      tourism: "Tourism types",
+      sites: "Historical sites",
+      map: "The map",
+      all: "All destinations",
+    },
+    hero: {
+      titleLine1: "Karbala.",
+      titleLine2: "A city of two shrines.",
+      bodyLine1:
+        "Holiest ground in the south, and a working city of some 800,000 people.",
+      bodyLine2:
+        "Two shrines in the middle, an old city around them, and desert on every side.",
+      cta: "See the thirteen places",
+      noteLeft: ["32.617° N,", "44.033° E.", "IRAQ."],
+      noteRight: ["SHRINES.", "OLD CITY.", "DESERT."],
+    },
+    city: {
+      index: "THE CITY",
+      titleLine1: "First a battlefield.",
+      titleLine2: "Then a city.",
+      bodyLine1:
+        "In 680 CE Husayn ibn Ali was killed here with his family and companions, at a place called al-Taff.",
+      bodyLine2:
+        "The town that grew over the grave is now the second city of central Iraq.",
+      historyTitle: "From al-Taff to Karbala",
+      history: [
+        "The battle was fought on 10 Muharram 61 — October 680 — between Husayn ibn Ali, grandson of the Prophet, and an army sent by the Umayyad governor of Kufa. Husayn's party was small and it was destroyed in a morning. The dead were buried where they fell, on a rise of dry ground west of the Euphrates.",
+        "A city followed the grave. A shrine was raised and rebuilt across the centuries — the Abbasid caliph al-Mutawakkil had it demolished, and it was raised again. Under the Buyids came the first city wall and its bazaars, in 982; from the Safavid and Qajar centuries onward, Persian pilgrims and scholars settled here in numbers, and the religious seminaries that grew up beside the shrines are still the reason many of Karbala's families are here.",
+        "That history explains the shape of the place. Between the two shrines runs the street the city calls Bayn al-Haramayn, and around it sits a closed, walkable centre with no cars inside a 1.5 km ring. Everything else — the bazaars, the husayniyyas, the hotels — is arranged by its distance from those few hundred metres, and for two months of the year, around Muharram and Arbaeen, they hold one of the largest annual gatherings anywhere.",
+      ],
+      pull: "The grave came first. The city is what followed.",
+      factsLabel: "AT A GLANCE",
+      facts: [
+        { label: "Governorate", value: "Karbala, central Iraq" },
+        {
+          label: "Settled",
+          value: "690 CE — the city grew up after the battle of 680",
+        },
+        { label: "Population", value: "About 800,000 (2024 census)" },
+        { label: "Elevation", value: "28 m above sea level" },
+        {
+          label: "Distance",
+          value: "About 90 km south-west of Baghdad, 80 km north of Najaf",
+        },
+        {
+          label: "Water",
+          value: "A few kilometres east of Lake Milh (al-Razzaza)",
+        },
+        {
+          label: "Getting there",
+          value:
+            "No airport yet — arrive by road, or on the Baghdad–Basra rail line",
+        },
+        {
+          label: "The centre",
+          value: "No cars inside a 1.5 km ring around the two shrines",
+        },
+        {
+          label: "Season",
+          value: "October to April. July and August run past 45 °C.",
+        },
+        {
+          label: "Busiest",
+          value:
+            "Arbaeen, forty days after Ashura, when pilgrims walk in from Najaf",
+        },
+      ],
+    },
+    tourism: {
+      index: "TYPES OF TOURISM",
+      titleLine1: "Five facets of",
+      titleLine2: "one holy city.",
+      bodyLine1:
+        "Beyond spiritual pilgrimage, Karbala is a vibrant nexus of antiquity,",
+      bodyLine2:
+        "world-class healthcare, deep scholarship, and desert nature.",
+      items: [
+        {
+          id: "religious",
+          name: "Religious Tourism",
+          description:
+            "The spiritual heart of Karbala, centered on the holy shrines of Imam Husayn and Al-Abbas, Bayn al-Haramayn, and the sacred Arbaeen journey welcoming millions of pilgrims annually.",
+          cta: "Explore holy shrines",
+          href: "#sites",
+        },
+        {
+          id: "archaeological",
+          name: "Archaeological Tourism",
+          description:
+            "Echoes of deep antiquity: the monumental Abbasid fortress of Al-Ukhaidir, the fifth-century Al-Aqiser Church, Simeon Palace, and prehistoric Tar Caves.",
+          cta: "Discover desert ruins",
+          href: "#sites",
+        },
+        {
+          id: "natural",
+          name: "Natural Tourism",
+          description:
+            "Desert waters and serene oases: the vast expanse of Lake Razzaza (Milh), the bubbling sulfur springs of Ayn al-Tamr, and date groves on the desert verge.",
+          cta: "See springs & oasis",
+          href: "#map",
+        },
+        {
+          id: "educational",
+          name: "Educational Tourism",
+          description:
+            "Centuries of intellectual legacy, from the venerable Hawza religious seminaries and historic archives to Warith Al-Anbiyaa University and modern academic symposiums.",
+          cta: "Explore academic life",
+          href: "#city",
+        },
+        {
+          id: "medical",
+          name: "Medical Tourism",
+          description:
+            "A premier medical hub in Iraq: advanced specialized medicine, oncology, and surgical centers at Warith International Foundation and Al-Kafeel Super Speciality Hospital.",
+          cta: "Learn about care centers",
+          href: "#city",
+        },
+      ],
+    },
+    sites: {
+      index: "HISTORICAL SITES",
+      titleLine1: "Thirteen places,",
+      titleLine2: "one city.",
+      bodyLine1:
+        "Two shrines in the middle, and a ring of sites out in the desert —",
+      bodyLine2: "Abbasid, Ottoman, Christian, and prehistoric.",
+      seeLabel: "Worth seeing",
+      openLabel: "Read about",
+      collectionNote:
+        "Thirteen places. Two of them are the reason for the other eleven.",
+      items: [
+        {
+          id: "imam-husayn-shrine",
+          number: "01",
+          name: "Imam Husayn Shrine",
+          kind: "Holy shrine",
+          area: "City centre",
+          icon: "shrine",
+          description:
+            "The grave of Husayn ibn Ali, grandson of the Prophet, and the reason Karbala exists.",
+          detail:
+            "The shrine stands on the ground where Husayn was killed on 10 Muharram 61 — October 680. A tomb became a shrine, the shrine became a city, and the city became one of the centres of Shia learning: al-Mutawakkil ordered the building demolished in the ninth century and it was raised again. It has been damaged, rebuilt and enlarged several times since.",
+          see: "The courtyard before sunrise, when it is nearly empty.",
+        },
+        {
+          id: "bayn-al-haramayn",
+          number: "02",
+          name: "Bayn al-Haramayn",
+          kind: "The old city axis",
+          area: "Between the two shrines",
+          icon: "axis",
+          description:
+            "The street between the shrines — the axis the whole old city is arranged around.",
+          detail:
+            "Bayn al-Haramayn, “between the two sanctuaries”, is the name of both the short street and the quarter that joins the two shrines, and on a pilgrimage day it is among the most crowded few hundred metres in Iraq. Everything else in the old city is described by its distance from here: the bazaars, the husayniyyas, the hotels, the seminaries.",
+          see: "The crush at Maghrib, with a gold dome at either end of the street.",
+        },
+        {
+          id: "abbas-shrine",
+          number: "03",
+          name: "Al-Abbas Shrine",
+          kind: "Holy shrine",
+          area: "City centre",
+          icon: "shrine",
+          description:
+            "The tomb of Abbas ibn Ali, Husayn's half-brother and standard-bearer, 380 m from the Imam.",
+          detail:
+            "Abbas carried the flag at Karbala and was killed fetching water for the camp's children, which is why pilgrims treat this shrine as the city's own and come here in particular on Tasu'a, the day before Ashura. Persian and Central Asian architects built the present structure: a pear-shaped dome, two tall minarets, a tomb under silver trelliswork and gold, and carpets rolled out across the floor.",
+          see: "The courtyard and the dome seen from the Bayn al-Haramayn side.",
+        },
+        {
+          id: "al-hurr-mosque",
+          number: "04",
+          name: "Al-Hurr ibn Yazid Mosque",
+          kind: "Shrine and mosque",
+          area: "North-west, on the Baghdad road",
+          icon: "standard",
+          description:
+            "The grave of the commander who changed sides on the morning of the battle.",
+          detail:
+            "Al-Hurr ibn Yazid al-Tamimi led the cavalry that stopped Husayn's caravan on the road to Kufa, then left the Umayyad army on the morning of 10 Muharram and died fighting beside him. The shrine marks where he fell, on the north-western edge of the city towards Baghdad, and it is one of the first stops on the pilgrimage roads in.",
+          see: "The approach from the Baghdad road at first light.",
+        },
+        {
+          id: "white-bridge",
+          number: "05",
+          name: "The White Bridge",
+          kind: "Ottoman bridge, 1550",
+          area: "Al-Husseiniya, east of the city",
+          icon: "bridge",
+          description:
+            "A 1550 bridge over the Husseiniya, on the old eastern approach to the city.",
+          detail:
+            "The White Bridge was built in 1550 across the Husseiniya, and it has carried pilgrims into Karbala for close to five centuries. It is one of the few dated pieces of Ottoman civil engineering left in the governorate, and the river under it still waters the orchards east of the city.",
+          see: "The arches from the low east bank.",
+        },
+        {
+          id: "al-ukhaidir-fortress",
+          number: "06",
+          name: "Al-Ukhaidir Fortress",
+          kind: "Abbasid fortress, 775 CE",
+          area: "About 50 km south-west",
+          icon: "fortress",
+          description:
+            "An Abbasid fortress standing alone in the desert, the finest of its kind in Iraq.",
+          detail:
+            "Built around 775 CE, Al-Ukhaidir is the best surviving example of Abbasid military architecture and has been on Iraq's UNESCO World Heritage tentative list since 2000. Behind the single gate is a whole complex — vaulted halls, a mosque, lodgings, stables — while the long outer walls carry almost no towers, which is one of the puzzles the building still sets.",
+          see: "The vaulted hall behind the gate, and the desert from the ramparts.",
+        },
+        {
+          id: "al-aqiser",
+          number: "07",
+          name: "Al-Aqiser",
+          kind: "Ancient church",
+          area: "Ayn al-Tamr, about 45 km west",
+          icon: "church",
+          description:
+            "A small ruined church in the western desert, described as the oldest in the East.",
+          detail:
+            "Al-Aqiser stands at Ayn al-Tamr on the western edge of the governorate: a small church with a nave and an apse, oriented east, dated by most accounts to the fifth century and described as the oldest church of the East. In 2019 a Chaldean congregation said prayers in the ruins again.",
+          see: "The apse, and the mud-brick town around it.",
+        },
+        {
+          id: "imam-ali-dropper-shrine",
+          number: "08",
+          name: "Imam Ali's Dropper Shrine",
+          kind: "Spring and mosque",
+          area: "About 25 km west",
+          icon: "spring",
+          description:
+            "A desert spring, held to have been brought back to life by Imam Ali, with a mosque beside it.",
+          detail:
+            "A small spring in the country west of Karbala, with a mosque built beside it, held by tradition to be one of the places where Imam Ali brought water out of the ground. It is a stop on the western pilgrimage routes and one of very few places between the city and the desert with water and shade.",
+          see: "The spring itself — it is still running.",
+        },
+        {
+          id: "simeon-palace",
+          number: "09",
+          name: "Simeon's Palace",
+          kind: "Pre-Islamic ruins",
+          area: "About 45 km west",
+          icon: "palace",
+          description:
+            "What is left of a palace and its estate from before Islam, out on the western plain.",
+          detail:
+            "Qasr Shimon is the remnant of a palace and its estate from before Islam, west of Karbala, its walls cut down to stubs. It belongs with Al-Aqiser and Al-Ukhaidir to the same scatter of late-antique and early-Islamic buildings in this desert, and is usually seen on the same day.",
+          see: "The plan of the building, still legible from the low walls.",
+        },
+        {
+          id: "mujada-ruins",
+          number: "10",
+          name: "Ruins of Mujada",
+          kind: "Unidentified ruin",
+          area: "About 40 km south-west, desert",
+          icon: "marker",
+          description:
+            "A cylindrical ruin in open desert whose origin nobody has settled.",
+          detail:
+            "Al-Mujada is a cylindrical structure of unknown origin, standing more than 30 m above sea level in open desert about 40 km from the city. There is no inscription, no settled date and no agreed purpose — which is the reason to go, and the reason to take water and a driver who knows the way.",
+          see: "The masonry, and the view back towards Karbala.",
+        },
+        {
+          id: "tar-caves",
+          number: "11",
+          name: "Tar Caves",
+          kind: "Cave complex",
+          area: "About 50 km south-west",
+          icon: "cave",
+          description:
+            "A cave complex in the desert, inhabited on and off since prehistoric times.",
+          detail:
+            "Kahf al-Tar is a large cave complex south-west of the city, occupied since prehistoric times and used by later communities as shelter. It is not a monument with a car park: the last stretch of road is rough, and the desert here is genuinely empty.",
+          see: "The main chamber, and the silence outside it.",
+        },
+        {
+          id: "khan-al-atshan",
+          number: "12",
+          name: "Khan al-Atshan",
+          kind: "Eighth-century ruin",
+          area: "About 30 km south",
+          icon: "fortress",
+          description:
+            "The ruin of a fortified waystation on the road south towards Najaf.",
+          detail:
+            "Khan al-Atshan — “the thirsty khan” — is the ruin of a fortified waystation dating to the eighth century, south of the city on the road to Najaf. The gate and the stubs of its towers are still legible, and its name remembers the problem that shaped every route across this plain.",
+          see: "The gate and the line of the outer wall.",
+        },
+        {
+          id: "al-rubu-caravansarai",
+          number: "13",
+          name: "Khan al-Rubu'",
+          kind: "Ottoman caravansarai",
+          area: "16 km south, on the Najaf road",
+          icon: "khan",
+          description:
+            "An Ottoman caravansarai on the pilgrim road between Karbala and Najaf.",
+          detail:
+            "Also known as Khan al-Nukhaylah, this caravansarai is Ottoman and sits about 16 km south of the city on the road to Najaf. It is one of the best preserved of the governorate's khans, a courtyard ringed by cells, and it has been used for cultural festivals in recent years. It shows exactly how the pilgrim road was provisioned.",
+          see: "The courtyard and the rows of cells around it.",
+        },
+      ],
+    },
+    maps: {
+      index: "ON THE MAP",
+      titleLine1: "The old city on foot,",
+      titleLine2: "the desert by car.",
+      bodyLine1:
+        "Both views carry the same thirteen sites. Switch between them, and open a pin",
+      bodyLine2: "for what the place is and what not to miss.",
+      mapLabel: "Map of the historical sites of Karbala",
+      viewLabel: "Which sites to show",
+      stopLabel: "Stop",
+      seeLabel: "Worth seeing",
+      views: [
+        {
+          id: "city",
+          label: "The old city",
+          hint: "Three stops, on foot",
+          stops: ["imam-husayn-shrine", "bayn-al-haramayn", "abbas-shrine"],
+        },
+        {
+          id: "region",
+          label: "Around Karbala",
+          hint: "Ten stops, about 160 km by car",
+          stops: [
+            "al-hurr-mosque",
+            "imam-ali-dropper-shrine",
+            "al-aqiser",
+            "al-ukhaidir-fortress",
+            "simeon-palace",
+            "mujada-ruins",
+            "tar-caves",
+            "khan-al-atshan",
+            "al-rubu-caravansarai",
+            "white-bridge",
+          ],
+        },
+      ],
+    },
+    plate: {
+      label: "The shrine of Imam Husayn",
+      heldLine: "And the city grew around it.",
+      overlayTitle: "Every street in Karbala is measured from here.",
+      overlayBody:
+        "Bazaars, seminaries, hotels, and a centre with no cars in it: all of it arranged by how far it sits from this dome.",
+      expandAlt:
+        "Illustration of the shrine of Imam Husayn in Karbala: a golden dome and two golden minarets above the old city and its palms",
+      expandHint: "Scroll",
+    },
+  },
 }
 
 const ar: Dictionary = {
@@ -695,10 +1205,12 @@ const ar: Dictionary = {
     scrollToDestinations: "انتقل إلى الوجهات",
     experiencesList: "طرق السفر",
     newsletterForm: "الاشتراك في النشرة البريدية",
+    footerNav: "أيضًا على مُضيف",
   },
   header: {
     destinations: "الوجهات",
     story: "قصتنا",
+    karbala: "كربلاء",
     cta: "اعثر على قصتك القادمة",
   },
   hero: {
@@ -866,7 +1378,7 @@ const ar: Dictionary = {
     },
     ur: {
       kind: "مدينة قديمة",
-      note: "مدينة سومرية وُلد فيها النبي إبراهيم، ولا تزال زقّورتها قائمة فوق السهل.",
+      note: "مدينة سومرية وُلد فيها النبي إبراهيم عليه السلام، ولا تزال زقّورتها قائمة فوق السهل.",
       see: "درج الزقّورة والقبور الملكية — اذهب باكرًا، فلا ظل هناك.",
     },
     uruk: {
@@ -1128,6 +1640,352 @@ const ar: Dictionary = {
     success: "شكرًا لك — تحقّق من بريدك للتأكيد.",
   },
   footer: { tagline: "مصنوع من الحكايات. متجذّر في العراق.", name: "مُضيف" },
+  karbala: {
+    meta: {
+      title: "كربلاء — مدينة المرقدين",
+      description:
+        "المدينة التي نشأت حول مرقدي الإمام الحسين عليه السلام وأبي الفضل العباس عليه السلام، وثلاثة عشر موضعًا تاريخيًا في محافظة كربلاء، مع خريطة لكل منها.",
+    },
+    nav: {
+      city: "المدينة",
+      tourism: "أنواع السياحة",
+      sites: "المواقع التاريخية",
+      map: "الخريطة",
+      all: "كل الوجهات",
+    },
+    hero: {
+      titleLine1: "كربلاء.",
+      titleLine2: "مدينة المرقدين.",
+      bodyLine1: "أقدس أرض في الجنوب، ومدينة عاملة يسكنها نحو ٨٠٠ ألف نسمة.",
+      bodyLine2: "مرقدان في الوسط، ومدينة قديمة حولهما، وصحراء على كل جهة.",
+      cta: "شاهد المواضع الثلاثة عشر",
+      noteLeft: ["٣٢٫٦١٧° شمالًا،", "٤٤٫٠٣٣° شرقًا.", "العراق."],
+      noteRight: ["مرقدان.", "مدينة قديمة.", "صحراء."],
+    },
+    city: {
+      index: "المدينة",
+      titleLine1: "أرض معركة أولًا.",
+      titleLine2: "ثم مدينة.",
+      bodyLine1:
+        "في سنة ٦٨٠م قُتل هنا الحسين بن علي عليه السلام مع أهله وأنصاره، في موضع يُسمّى الطفّ.",
+      bodyLine2: "والبلدة التي نبتت حول المرقد هي اليوم ثاني مدن وسط العراق.",
+      historyTitle: "من الطفّ إلى كربلاء",
+      history: [
+        "جرت المعركة في العاشر من محرّم سنة ٦١هـ — تشرين الأول ٦٨٠م — بين الحسين بن علي عليه السلام، حفيد النبي عليه السلام، وجيش أرسله والي الكوفة من بني أمية. كان ركب الحسين عليه السلام قليلًا، وانتهى في صبيحة واحدة، ودُفن القتلى حيث سقطوا، على ربوة من أرض يابسة غرب الفرات.",
+        "ثم جاءت المدينة بعد المرقد. رُفع المقام وأُعيد بناؤه على مدى القرون — أمر الخليفة العباسي المتوكّل بهدمه فرُفع من جديد. وفي العهد البويهي جاء السور الأول وأسواق المدينة سنة ٣٧٢هـ، ومن القرنين العاشر والحادي عشر الهجريين استوطنها زائرون وعلماء من فارس بأعداد كبيرة، وما زالت الحوزة التي نمت بجانب المرقدين هي سبب وجود كثير من عائلات كربلاء.",
+        "وهذا التاريخ يفسّر شكل المكان. بين المرقدين يمتد الشارع الذي تسمّيه المدينة «بين الحرمين»، وحوله مركز مغلق يُمشى فيه ولا سيارات داخل نطاق ١٫٥ كم. وكل ما عداه — الأسواق والحسينيات والفنادق — مرتّب بحسب بُعده عن تلك المئات من الأمتار، ولمدة شهرين في السنة، حول محرّم والأربعين، تحتضن هذه المساحة واحدًا من أكبر التجمعات السنوية في العالم.",
+      ],
+      pull: "المرقد جاء أولًا. والمدينة هي ما تلا ذلك.",
+      factsLabel: "لمحة سريعة",
+      facts: [
+        { label: "المحافظة", value: "كربلاء، وسط العراق" },
+        {
+          label: "الاستيطان",
+          value: "٦٩٠م — نشأت المدينة بعد معركة ٦٨٠",
+        },
+        { label: "السكان", value: "نحو ٨٠٠٬٠٠٠ (إحصاء ٢٠٢٤)" },
+        { label: "الارتفاع", value: "٢٨ مترًا فوق سطح البحر" },
+        {
+          label: "المسافة",
+          value: "نحو ٩٠ كم جنوب غرب بغداد، و٨٠ كم شمال النجف",
+        },
+        {
+          label: "الماء",
+          value: "على كيلومترات قليلة شرق بحيرة الملح (الرزازة)",
+        },
+        {
+          label: "الوصول",
+          value: "لا مطار بعد — الوصول برًّا، أو بخط بغداد–البصرة الحديدي",
+        },
+        { label: "المركز", value: "لا سيارات داخل نطاق ١٫٥ كم حول المرقدين" },
+        {
+          label: "الموسم",
+          value: "تشرين الأول إلى نيسان. أما تموز وآب فيتجاوزان ٤٥ °م.",
+        },
+        {
+          label: "الذروة",
+          value:
+            "الأربعين، بعد أربعين يومًا من عاشوراء، حين يأتي الزائرون مشيًا من النجف",
+        },
+      ],
+    },
+    tourism: {
+      index: "أنواع السياحة",
+      titleLine1: "خمسة أوجه",
+      titleLine2: "لمدينة واحدة.",
+      bodyLine1:
+        "إلى جانب مكانتها الروحية العظيمة، تمثل كربلاء ملتقىً متكاملًا للآثار التاريخية،",
+      bodyLine2:
+        "والصروح العلاجية المتقدمة، والحواضر العلمية، والواحات الطبيعية.",
+      items: [
+        {
+          id: "religious",
+          name: "السياحة الدينية",
+          description:
+            "النبض الروحي للمدينة، حيث يقع مرقدا الإمام الحسين وأخيه العباس (عليهما السلام) ومنطقة بين الحرمين الشريفين، وملتقى ملايين الزائرين سنويًا من كل أصقاع الأرض.",
+          cta: "استكشف العتبات والمراقد",
+          href: "#sites",
+        },
+        {
+          id: "archaeological",
+          name: "السياحة الأثرية",
+          description:
+            "شواهد معمارية ضاربة في عمق التاريخ: حصن الأخيضر العباسي الفريد، كنيسة الأقيصر الأثرية التي تعود للقرن الخامس، قصر شمعون، وكهوف الطار التاريخية.",
+          cta: "اكتشف المعالم الأثرية",
+          href: "#sites",
+        },
+        {
+          id: "natural",
+          name: "السياحة الطبيعية",
+          description:
+            "طبيعة خلابة وسط الصحراء: مياه بحيرة الرزازة الشاسعة، العيون الكبريتية والينابيع الطبيعية في قضاء عين التمر، وبساتين النخيل الوارفة.",
+          cta: "شاهد الواحات والينابيع",
+          href: "#map",
+        },
+        {
+          id: "educational",
+          name: "السياحة التعليمية",
+          description:
+            "حاضرة معرفية كبرى تحتضن الحوزات العلمية والمكتبات التراثية النادرة، إلى جانب جامعات حديثة رائدة كجامعة وارث الأنبياء ومؤتمرات فكرية ودولية.",
+          cta: "تعرف على الصروح العلمية",
+          href: "#city",
+        },
+        {
+          id: "medical",
+          name: "السياحة العلاجية والطبية",
+          description:
+            "وجهة علاجية متطورة على مستوى العراق والمنطقة، تقودها مراكز تخصصية رائدة كمؤسسة وارث الدولية لعلاج الأورام ومستشفى الكفيل التخصصي للرعاية الدقيقة.",
+          cta: "اطلع على المراكز الطبية",
+          href: "#city",
+        },
+      ],
+    },
+    sites: {
+      index: "المواقع التاريخية",
+      titleLine1: "ثلاثة عشر موضعًا،",
+      titleLine2: "ومدينة واحدة.",
+      bodyLine1: "مرقدان في الوسط، وحلقة من المواقع في الصحراء —",
+      bodyLine2: "عباسية وعثمانية ومسيحية وما قبل التاريخ.",
+      seeLabel: "يستحق المشاهدة",
+      openLabel: "اقرأ عن",
+      collectionNote:
+        "ثلاثة عشر موضعًا. اثنان منها هما السبب في الأحد عشر الباقية.",
+      items: [
+        {
+          id: "imam-husayn-shrine",
+          number: "01",
+          name: "مرقد الإمام الحسين عليه السلام",
+          kind: "مرقد مقدّس",
+          area: "وسط المدينة",
+          icon: "shrine",
+          description:
+            "مرقد الحسين بن علي عليه السلام، حفيد النبي عليه السلام، والسبب الذي وُجدت كربلاء من أجله.",
+          detail:
+            "يقف المرقد على الأرض التي قُتل فيها الحسين عليه السلام في العاشر من محرّم سنة ٦١هـ — تشرين الأول ٦٨٠م. صار الضريح مقامًا، وصار المقام مدينة، وصارت المدينة أحد مراكز العلم في التشيّع: أمر المتوكّل بهدم البناء في القرن الثالث الهجري فرُفع من جديد، وتضرّر وأُعيد بناؤه ووُسّع مرات بعد ذلك.",
+          see: "الصحن قبل الشروق، حين يكاد يخلو.",
+        },
+        {
+          id: "bayn-al-haramayn",
+          number: "02",
+          name: "بين الحرمين",
+          kind: "محور المدينة القديمة",
+          area: "بين المرقدين",
+          icon: "axis",
+          description:
+            "الشارع الذي يصل المرقدين — المحور الذي انتظمت حوله المدينة القديمة كلها.",
+          detail:
+            "«بين الحرمين» اسم الشارع القصير والحيّ الذي يجمع المرقدين، وهو في يوم زيارة من أكثر بضع مئات من الأمتار ازدحامًا في العراق. وكل ما في المدينة القديمة يُوصف بُعده من هنا: الأسواق والحسينيات والفنادق والحوزة.",
+          see: "الزحام عند المغرب، وقبة ذهبية في كل طرف من طرفي الشارع.",
+        },
+        {
+          id: "abbas-shrine",
+          number: "03",
+          name: "مرقد أبي الفضل العباس عليه السلام",
+          kind: "مرقد مقدّس",
+          area: "وسط المدينة",
+          icon: "shrine",
+          description:
+            "مرقد العباس بن علي عليه السلام، أخو الحسين عليه السلام وحامل لوائه، على ٣٨٠ مترًا من مرقد الإمام عليه السلام.",
+          detail:
+            "حمل العباس عليه السلام اللواء في كربلاء وقُتل وهو يحاول جلب الماء لأطفال المخيّم، ولذلك يتعامل الزائرون مع هذا المرقد كأنه مرقد المدينة نفسه، ويقصدونه خاصة في تاسوعاء، اليوم الذي يسبق عاشوراء. بنى البناء الحالي معماريون من فارس وآسيا الوسطى: قبة كمثرية ومنارتان مرتفعتان وقبر تحت شبكة فضية وذهب وفرش على الأرض.",
+          see: "الصحن والقبة من جهة بين الحرمين.",
+        },
+        {
+          id: "al-hurr-mosque",
+          number: "04",
+          name: "جامع الحرّ بن يزيد عليه السلام",
+          kind: "مرقد وجامع",
+          area: "شمال غرب، على طريق بغداد",
+          icon: "standard",
+          description: "مرقد القائد الذي غيّر موقفه في صباح المعركة.",
+          detail:
+            "قاد الحرّ بن يزيد التميمي عليه السلام الخيل التي أوقفت ركب الحسين عليه السلام على طريق الكوفة، ثم ترك جيش بني أمية في صباح العاشر من محرّم وقُتل وهو يقاتل إلى جانب الحسين عليه السلام. يشير المرقد إلى الموضع الذي سقط فيه، على الطرف الشمالي الغربي للمدينة باتجاه بغداد، وهو من أولى المحطات على طرق الزيارة الداخلة إلى كربلاء.",
+          see: "المقبل من طريق بغداد عند أول الضوء.",
+        },
+        {
+          id: "white-bridge",
+          number: "05",
+          name: "الجسر الأبيض",
+          kind: "جسر عثماني، ١٥٥٠",
+          area: "الحسينية، شرق المدينة",
+          icon: "bridge",
+          description:
+            "جسر من سنة ١٥٥٠ على نهر الحسينية، على المدخل الشرقي القديم للمدينة.",
+          detail:
+            "بُني الجسر الأبيض سنة ١٥٥٠ على نهر الحسينية، وظلّ يحمل الزائرين إلى كربلاء نحو خمسة قرون. وهو من قليل ما بقي من هندسة مدنية عثمانية مؤرّخة في المحافظة، والنهر تحته لا يزال يسقي بساتين شرق المدينة.",
+          see: "العقود من الضفة الشرقية عند انخفاض الماء.",
+        },
+        {
+          id: "al-ukhaidir-fortress",
+          number: "06",
+          name: "قلعة الأخيضر",
+          kind: "قلعة عباسية، ٧٧٥م",
+          area: "نحو ٥٠ كم جنوب غرب",
+          icon: "fortress",
+          description:
+            "قلعة عباسية قائمة وحدها في الصحراء، وأجمل ما بقي من نوعها في العراق.",
+          detail:
+            "بُنيت حول سنة ٧٧٥م، وهي أرقى ما بقي من العمارة العسكرية العباسية، وعلى اللائحة المؤقتة لمواقع التراث العالمي منذ ٢٠٠٠. خلف البوابة الواحدة مجمّع كامل — قاعات معقودة وجامع ومساكن وإصطبلات — أما الجدران الخارجية الطويلة فتكاد تخلو من الأبراج، وهذا واحد من الألغاز التي ما زال البناء يطرحها.",
+          see: "القاعة المعقودة خلف البوابة، والصحراء من الأسوار.",
+        },
+        {
+          id: "al-aqiser",
+          number: "07",
+          name: "الأقيصر",
+          kind: "كنيسة قديمة",
+          area: "عين التمر، نحو ٤٥ كم غربًا",
+          icon: "church",
+          description:
+            "كنيسة صغيرة مهدمة في الصحراء الغربية، تُوصف بأنها الأقدم في المشرق.",
+          detail:
+            "تقع الأقيصر في عين التمر على الحافة الغربية للمحافظة: كنيسة صغيرة بصحن وهيكل، متّجهة إلى الشرق، ويؤرّخها معظم الدارسين بالقرن الخامس الميلادي ويصفونها بأقدم كنيسة في المشرق. وفي ٢٠١٩ أُقيمت الصلاة في أطلالها من جديد على يد جماعة كلدانية.",
+          see: "الهيكل، والبلدة الطينية حوله.",
+        },
+        {
+          id: "imam-ali-dropper-shrine",
+          number: "08",
+          name: "مقام قطرة الإمام علي عليه السلام",
+          kind: "عين ومقام",
+          area: "نحو ٢٥ كم غربًا",
+          icon: "spring",
+          description:
+            "عين في الصحراء، يُروى أن الإمام علي عليه السلام أعادها إلى الحياة، وبجانبها مقام.",
+          detail:
+            "عين صغيرة في الريف غرب كربلاء، بجانبها مقام، ويُروى في التقليد أنها من المواضع التي أخرج فيها الإمام علي عليه السلام الماء من الأرض. وهي محطة على الطرق الغربية للزيارة، ومن المواضع القليلة جدًا بين المدينة وأطراف الصحراء التي فيها ماء وظل.",
+          see: "العين نفسها — ما زالت تجري.",
+        },
+        {
+          id: "simeon-palace",
+          number: "09",
+          name: "قصر شمعون",
+          kind: "أطلال ما قبل الإسلام",
+          area: "نحو ٤٥ كم غربًا",
+          icon: "palace",
+          description:
+            "ما بقي من قصر وأملاكه من عصر ما قبل الإسلام، في السهل الغربي.",
+          detail:
+            "قصر شمعون هو ما تبقّى من قصر وأملاك تعودان إلى ما قبل الإسلام، غرب كربلاء، وقد انخفضت جدرانه إلى جذوع. وهو ينتمي مع الأقيصر والأخيضر إلى المجموعة نفسها من أبنية أواخر العصور القديمة وأول الإسلام في هذه الصحراء، ويُزار عادة في اليوم نفسه.",
+          see: "مخطط البناء، ولا يزال مقروءًا من الجدران المنخفضة.",
+        },
+        {
+          id: "mujada-ruins",
+          number: "10",
+          name: "أطلال المُجادة",
+          kind: "أطلال مجهولة",
+          area: "نحو ٤٠ كم جنوب غرب، صحراء",
+          icon: "marker",
+          description: "أطلال أسطوانية في صحراء مفتوحة، لم يُحسم أصلها بعد.",
+          detail:
+            "المُجادة بناء أسطواني مجهول الأصل، يرتفع أكثر من ٣٠ مترًا عن سطح البحر في صحراء مفتوحة على نحو ٤٠ كم من المدينة. لا نقش ولا تاريخ متّفق عليه ولا وظيفة معروفة — وهذا سبب الذهاب، وسبب أخذ الماء وسائق يعرف الطريق.",
+          see: "البناء بالحجر، والمنظر عائدًا نحو كربلاء.",
+        },
+        {
+          id: "tar-caves",
+          number: "11",
+          name: "كهوف الطار",
+          kind: "مجموعة كهوف",
+          area: "نحو ٥٠ كم جنوب غرب",
+          icon: "cave",
+          description:
+            "مجموعة كهوف في الصحراء، مسكونة على فترات منذ عصور ما قبل التاريخ.",
+          detail:
+            "كهف الطار مجموعة كهوف كبيرة جنوب غرب المدينة، سُكنت منذ عصور ما قبل التاريخ واستخدمتها جماعات لاحقة ملجأً. وهو ليس أثرًا له موقف سيارات: آخر امتداد للطريق وعر، والصحراء هنا خالية فعلًا.",
+          see: "القاعة الرئيسية، والسكون خارجها.",
+        },
+        {
+          id: "khan-al-atshan",
+          number: "12",
+          name: "خان العطشان",
+          kind: "أطلال من القرن الثاني الهجري",
+          area: "نحو ٣٠ كم جنوبًا",
+          icon: "fortress",
+          description: "أطلال محطة محصّنة على الطريق الجنوبي نحو النجف.",
+          detail:
+            "خان العطشان هو أطلال محطة محصّنة تعود إلى القرن الثاني الهجري، جنوب المدينة على طريق النجف. بوابته وجذوع أبراجه لا تزال مقروءة، واسمه يتذكّر المشكلة التي شكّلت كل طريق يعبر هذا السهل.",
+          see: "البوابة وخط السور الخارجي.",
+        },
+        {
+          id: "al-rubu-caravansarai",
+          number: "13",
+          name: "خان الربع",
+          kind: "خان عثماني",
+          area: "١٦ كم جنوبًا، على طريق النجف",
+          icon: "khan",
+          description: "خان عثماني على طريق الزيارة بين كربلاء والنجف.",
+          detail:
+            "يُعرف أيضًا بخان النخيلة، وهو خان عثماني يقع على نحو ١٦ كم جنوب المدينة على طريق النجف. وهو من أفضل خانات المحافظة حالًا، بفناء تحيط به الغرف، وقد استُخدم في السنوات الأخيرة في مهرجانات ثقافية. وهو يبيّن بالضبط كيف كانت الطريق تُجهّز للزائرين.",
+          see: "الفناء وصفوف الغرف حوله.",
+        },
+      ],
+    },
+    maps: {
+      index: "على الخريطة",
+      titleLine1: "المدينة القديمة على القدمين،",
+      titleLine2: "والصحراء بالسيارة.",
+      bodyLine1:
+        "يعرض المنظران المواضع الثلاثة عشر نفسها. بدّل بينهما، وافتح أي دبّوس",
+      bodyLine2: "لتعرف ما المكان وما لا يُفوَّت فيه.",
+      mapLabel: "خريطة المواقع التاريخية في كربلاء",
+      viewLabel: "أي المواقع تُعرض",
+      stopLabel: "المحطة",
+      seeLabel: "يستحق المشاهدة",
+      views: [
+        {
+          id: "city",
+          label: "المدينة القديمة",
+          hint: "ثلاث محطات، على القدمين",
+          stops: ["imam-husayn-shrine", "bayn-al-haramayn", "abbas-shrine"],
+        },
+        {
+          id: "region",
+          label: "حول كربلاء",
+          hint: "عشر محطات، نحو ١٦٠ كم بالسيارة",
+          stops: [
+            "al-hurr-mosque",
+            "imam-ali-dropper-shrine",
+            "al-aqiser",
+            "al-ukhaidir-fortress",
+            "simeon-palace",
+            "mujada-ruins",
+            "tar-caves",
+            "khan-al-atshan",
+            "al-rubu-caravansarai",
+            "white-bridge",
+          ],
+        },
+      ],
+    },
+    plate: {
+      label: "مرقد الإمام الحسين عليه السلام",
+      heldLine: "والمدينة نمت حوله.",
+      overlayTitle: "كل شارع في كربلاء يُقاس من هنا.",
+      overlayBody:
+        "أسواق وحوزة وفنادق ومركز لا سيارات فيه: كلّه مرتّب بحسب بُعده عن هذه القبة.",
+      expandAlt:
+        "رسم لمرقد الإمام الحسين عليه السلام في كربلاء: قبة ذهبية ومنارتان ذهبيتان فوق المدينة القديمة ونخيلها",
+      expandHint: "اسحب",
+    },
+  },
 }
 
 const dictionaries: Record<Locale, Dictionary> = { en, ar }
